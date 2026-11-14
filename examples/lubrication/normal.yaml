@@ -1,0 +1,49 @@
+id: lubrication-normal
+description: 'Caso lubrication: normal'
+program: correct.st
+duration_ms: 1600
+scan_ms: 100
+initial:
+  LevelOK: true
+events:
+- scan: 0
+  set:
+    Start: true
+- scan: 1
+  set:
+    Start: false
+- scan: 2
+  set:
+    Pressure: true
+- scan: 14
+  set:
+    Stop: true
+requirements:
+- id: L01
+  kind: hold
+  description: Arranque permitido
+  expr: Pump
+  start_ms: 0
+  end_ms: 500
+- id: L02-pause
+  kind: hold
+  description: Pausa cíclica
+  expr: NOT Pump
+  start_ms: 600
+  end_ms: 900
+- id: L02-repeat
+  kind: hold
+  description: Nueva lubricación
+  expr: Pump
+  start_ms: 1000
+  end_ms: 1300
+- id: L04-stop
+  kind: response
+  description: Stop para en el mismo scan
+  trigger: Stop
+  expr: NOT Pump
+  within_ms: 0
+- id: L-normal
+  kind: always
+  description: Presión confirmada evita falla
+  expr: NOT Fault

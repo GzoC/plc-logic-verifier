@@ -9,7 +9,7 @@ MAX_SOURCE = 65536
 GRAMMAR = r"""
 start: "PROGRAM"i NAME declaration* statements "END_PROGRAM"i
 declaration: SECTION decl+ "END_VAR"i
-SECTION: /VAR_INPUT|VAR_OUTPUT|VAR/i
+SECTION.3: /(?:VAR_INPUT|VAR_OUTPUT|VAR)\b/i
 decl: names ":" TYPE [":=" expr] ";"
 names: NAME ("," NAME)*
 TYPE: /BOOL|INT|TIME|TON|R_TRIG/i
@@ -41,8 +41,8 @@ AND: /AND/i
 CMP: "<>" | "<=" | ">=" | "=" | "<" | ">"
 ADD: "+" | "-"
 MUL: "*" | "/" | /MOD/i
-UNARY: /NOT/i | "-" | "+"
-BOOL_LITERAL.3: /TRUE|FALSE/i
+UNARY.3: /NOT\b/i | "-" | "+"
+BOOL_LITERAL.3: /(?:TRUE|FALSE)\b/i
 TIME_LITERAL.3: /(?:TIME|T)#(?:[0-9]+(?:ms|s|m|h))+/i
 INT_LITERAL: /[0-9]+/
 SIGNED_INT: /-?[0-9]+/

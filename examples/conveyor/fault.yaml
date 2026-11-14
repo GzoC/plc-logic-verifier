@@ -1,0 +1,57 @@
+id: conveyor-fault
+description: 'Caso conveyor: fault'
+program: correct.st
+duration_ms: 1400
+scan_ms: 100
+initial: {}
+events:
+- scan: 0
+  set:
+    Start: true
+- scan: 1
+  set:
+    Start: false
+- scan: 4
+  set:
+    Jam: true
+- scan: 6
+  set:
+    Ack: true
+- scan: 8
+  set:
+    Ack: false
+- scan: 9
+  set:
+    Jam: false
+- scan: 11
+  set:
+    Ack: true
+- scan: 12
+  set:
+    Start: true
+    Ack: false
+requirements:
+- id: C03
+  kind: hold
+  description: Timeout de atasco
+  expr: Fault AND NOT A AND NOT B
+  start_ms: 700
+  end_ms: 1000
+- id: C04
+  kind: latch
+  description: Falla persiste hasta reconocimiento válido
+  trigger: Fault
+  expr: Fault
+  until: Ack AND NOT Jam AND NOT Start AND NOT Stop
+- id: C05-idle
+  kind: hold
+  description: Reconocer no arranca
+  expr: NOT Fault AND NOT A AND NOT B
+  start_ms: 1100
+  end_ms: 1100
+- id: C05-start
+  kind: hold
+  description: Nueva orden arranca aguas abajo
+  expr: B AND NOT A
+  start_ms: 1200
+  end_ms: 1300

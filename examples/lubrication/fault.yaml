@@ -1,0 +1,63 @@
+id: lubrication-fault
+description: 'Caso lubrication: fault'
+program: correct.st
+duration_ms: 1300
+scan_ms: 100
+initial:
+  LevelOK: true
+events:
+- scan: 0
+  set:
+    Start: true
+- scan: 6
+  set:
+    Pressure: true
+- scan: 7
+  set:
+    Ack: true
+- scan: 8
+  set:
+    Start: false
+- scan: 9
+  set:
+    Start: true
+    Ack: false
+- scan: 11
+  set:
+    LevelOK: false
+requirements:
+- id: L03
+  kind: hold
+  description: Timeout de presión enclava falla
+  expr: Fault AND NOT Pump
+  start_ms: 400
+  end_ms: 700
+- id: L05
+  kind: latch
+  description: Recuperar presión no reconoce la falla
+  trigger: Fault
+  expr: Fault
+  until: Ack AND LevelOK AND Pressure AND NOT Start AND NOT Stop
+- id: L06
+  kind: hold
+  description: Reconocimiento inválido con Start sostenido
+  expr: Fault
+  start_ms: 700
+  end_ms: 700
+- id: L07
+  kind: hold
+  description: Reconocimiento válido no rearranca
+  expr: NOT Pump AND NOT Fault
+  start_ms: 800
+  end_ms: 800
+- id: L07-start
+  kind: hold
+  description: Nueva orden explícita
+  expr: Pump
+  start_ms: 900
+  end_ms: 1000
+- id: L04-level
+  kind: never
+  description: Sin nivel no hay salida
+  when: NOT LevelOK
+  expr: Pump

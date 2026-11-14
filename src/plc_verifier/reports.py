@@ -1,0 +1,107 @@
+"""Escaped, self-contained reports derived exclusively from saved engine results."""
+
+import csv
+import html
+import io
+import json
+import xml.etree.ElementTree as ET
+from pathlib import Path
+
+from .language import VerificationError
+
+STATUSES = {"PASS", "FAIL", "ERROR", "UNSUPPORTED", "NOT_EVALUATED"}
+
+
+def validate_result(result):
+    if not isinstance(result, dict) or result.get("schema_version") != 1 or result.get("status") not in STATUSES:
+        raise VerificationError("Unrecognized result schema/status")
+    if not isinstance(result.get("trace"), list) or not isinstance(result.get("requirements"), list):
+        raise VerificationError("Result needs trace and requirements arrays")
+    if len(result["trace"]) > 10000 or len(result["requirements"]) > 100:
+        raise VerificationError("Result exceeds limits")
+    for r in result["requirements"]:
+        if not isinstance(r, dict) or r.get("status") not in STATUSES or "id" not in r:
+            raise VerificationError("Invalid requirement result")
+    for row in result["trace"]:
+        if not isinstance(row, dict) or not {"scan", "time_ms", "inputs", "outputs", "variables", "blocks"} <= row.keys():
+            raise VerificationError("Invalid trace row")
+    return result
+
+
+def json_report(result):
+    return json.dumps(result, ensure_ascii=False, indent=2)
+
+
+def csv_report(result):
+    rows = []
+    for row in result["trace"]:
+        flat = {"scan": row["scan"], "time_ms": row["time_ms"]}
+        for group in ("inputs", "outputs", "variables", "blocks"):
+            for name, value in row[group].items():
+                if isinstance(value, dict):
+                    for member, v in value.items():
+                        flat[f"{group}.{name}.{member}"] = v
+                else:
+                    flat[f"{group}.{name}"] = value
+        flat["assertions"] = json.dumps(row.get("assertions", []), ensure_ascii=False)
+        flat["writes"] = json.dumps(row.get("writes", {}))
+        rows.append(flat)
+    fields = list(dict.fromkeys(k for row in rows for k in row)) or ["scan", "time_ms"]
+    out = io.StringIO(newline="")
+    writer = csv.DictWriter(out, fieldnames=fields)
+    writer.writeheader()
+    writer.writerows(rows)
+    return out.getvalue()
+
+
+def junit_report(result):
+    cases = list(result["requirements"])
+    if result["status"] in {"ERROR", "UNSUPPORTED"} or not cases:
+        cases.append({"id": "engine", "status": result["status"], "reason": str(result.get("error"))})
+    suite = ET.Element("testsuite", name=result.get("scenario", {}).get("id", "PLC Logic Verifier"),
+                       tests=str(len(cases)), failures=str(sum(r["status"] == "FAIL" for r in cases)),
+                       errors=str(sum(r["status"] in {"ERROR", "UNSUPPORTED"} for r in cases)),
+                       skipped=str(sum(r["status"] == "NOT_EVALUATED" for r in cases)))
+    for r in cases:
+        case = ET.SubElement(suite, "testcase", name=r["id"], classname="plc.requirement")
+        kind = {"FAIL": "failure", "ERROR": "error", "UNSUPPORTED": "error", "NOT_EVALUATED": "skipped"}.get(r["status"])
+        if kind:
+            item = ET.SubElement(case, kind, message=r.get("reason", r["status"]))
+            item.text = json.dumps(r, ensure_ascii=False)
+    return ET.tostring(suite, encoding="unicode", xml_declaration=True)
+
+
+def html_report(result):
+    def esc(v):
+        return html.escape(str(v))
+    def pretty(v):
+        return esc(json.dumps(v, ensure_ascii=False, indent=2))
+    requirements = []
+    for r in result["requirements"]:
+        evidence = ""
+        if r.get("evidence_scans"):
+            low, high = r["evidence_scans"]
+            evidence = f'<h4>Ventana de evidencia: scans {low}–{high}</h4><pre>{pretty(result["trace"][low:high + 1])}</pre>'
+        requirements.append(f'<article><h3>{esc(r["id"])} · {esc(r["status"])}</h3><p>{esc(r.get("description", ""))}</p><pre>{pretty(r)}</pre>{evidence}</article>')
+    return f'''<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>PLC Logic Verifier · {esc(result["status"])}</title><style>
+body{{font:16px system-ui;margin:40px auto;max-width:1100px;padding:0 24px;color:#172b35;background:#f5f6f3}}
+h1{{font-size:32px}}article,details{{background:white;padding:20px;margin:16px 0;border:1px solid #d2dbd6;border-radius:8px}}
+pre{{white-space:pre-wrap;overflow-wrap:anywhere;font:13px ui-monospace,monospace}}.notice{{border-left:5px solid #d26b26;padding:16px;background:#fff1dc}}
+</style><h1>PLC Logic Verifier</h1><h2>Resultado: {esc(result["status"])}</h2>
+<p class="notice">{esc(result["notice"])}</p><p>Escenarios observados, no prueba formal exhaustiva. No sustituye FAT, SAT ni revisión de ingeniería.</p>
+<p>Motor {esc(result["engine_version"])} · esquema {esc(result["schema_version"])}</p>
+<pre>Programa SHA-256: {esc(result["program_sha256"])}\nEscenario SHA-256: {esc(result["scenario_sha256"])}\nReproducir: {esc(result["reproduce"])}</pre>
+<h2>Alcance y semántica</h2><pre>{pretty(result["semantics"])}</pre>
+<details><summary>Configuración del escenario</summary><pre>{pretty(result.get("scenario"))}</pre></details>
+<h2>Requisitos y evidencia</h2>{''.join(requirements)}<pre>{pretty(result.get("error"))}</pre>
+<details><summary>Traza completa ({len(result["trace"])} scans)</summary><pre>{pretty(result["trace"])}</pre></details>
+<p>Las ubicaciones son últimas escrituras ejecutadas; una causa raíz requiere revisión. No hay conclusiones de IA en este informe determinista.</p></html>'''
+
+
+def export(result, folder: Path):
+    validate_result(result)
+    folder.mkdir(parents=True, exist_ok=True)
+    for name, content in {"result.json": json_report(result), "trace.csv": csv_report(result),
+                          "report.html": html_report(result), "junit.xml": junit_report(result)}.items():
+        (folder / name).write_text(content, encoding="utf-8", newline="")

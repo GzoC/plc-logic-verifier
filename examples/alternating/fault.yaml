@@ -1,0 +1,56 @@
+id: alternating-fault
+description: 'Caso alternating: fault'
+program: correct.st
+duration_ms: 1000
+scan_ms: 100
+initial:
+  Available1: true
+  Available2: true
+events:
+- scan: 0
+  set:
+    Demand: true
+- scan: 3
+  set:
+    Available1: false
+- scan: 6
+  set:
+    Available2: false
+- scan: 8
+  set:
+    Available1: true
+requirements:
+- id: B03-gap
+  kind: hold
+  description: Transferencia con scan apagado
+  expr: NOT P1 AND NOT P2
+  start_ms: 300
+  end_ms: 300
+- id: B03-transfer
+  kind: hold
+  description: Reserva toma demanda
+  expr: P2 AND NOT P1
+  start_ms: 400
+  end_ms: 500
+- id: B02
+  kind: mutex
+  description: Nunca simultáneas
+  steps:
+  - P1
+  - P2
+- id: B05
+  kind: always
+  description: Salidas sólo con disponibilidad
+  expr: (NOT P1 OR Available1) AND (NOT P2 OR Available2)
+- id: B06
+  kind: hold
+  description: Indisponibilidad total
+  expr: Alarm AND NOT P1 AND NOT P2
+  start_ms: 600
+  end_ms: 700
+- id: B-recover
+  kind: hold
+  description: Recuperación disponible
+  expr: P1 AND NOT Alarm
+  start_ms: 800
+  end_ms: 900

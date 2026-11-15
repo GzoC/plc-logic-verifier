@@ -31,12 +31,16 @@ Base remota verificada antes de esta subida: `9fc1d6e`.
 - CLI desde el entorno nuevo: lubricación normal PASS (código 0); timeout desactivado
   FAIL (código 1), requisito L03 en scan 4 / 400 ms.
 - `uv build` genera sdist y wheel; el wheel contiene `plc_verifier/ui.html`.
+- Código y evidencias subidos en `ac3043bffb8927473c0efcb3cd2ec1878e92d330`;
+  coincidencia local/remota comprobada. [CI 43726130985](https://github.com/GzoC/plc-logic-verifier/actions/runs/43726130985)
+  finalizada con **success en Windows y Linux**, incluidos instalación, lint, formato,
+  tipos, suite, ejemplo CLI y subida de artefactos. El cierre posterior sólo modifica
+  documentación y omite una repetición de CI mediante `[skip ci]`.
 - La captura previa `docs/evidence/ui-failure.jpg` se conservó y se inspeccionó;
   no se presenta como una nueva prueba de navegador.
 
 ### Pendientes y límites
 
-- Confirmar resultado de GitHub Actions después del push de este checkpoint.
 - El registro previo de UI indica PASS/FAIL en Edge y timeout al esperar una descarga;
   la ruta HTTP de exportación y los cuatro formatos sí están probados por la suite.
   La descarga mediante el navegador sigue pendiente de nueva comprobación.
@@ -46,8 +50,8 @@ Base remota verificada antes de esta subida: `9fc1d6e`.
 
 ### Cuota y continuidad
 
-Última lectura durante esta etapa: **88% restante en ventana de 300 minutos**
-(`usedPercent=12`), **29% semanal**. Es cuota compartida de la cuenta, no tiempo
+Última lectura durante esta etapa: **78% restante en ventana de 300 minutos**
+(`usedPercent=22`), **27% semanal**. Es cuota compartida de la cuenta, no tiempo
 de reloj ni un saldo diario fijo. Consultar de nuevo antes de continuar.
 
 Consultar `mcp__codex_app.get_usage_limits` al cerrar cada etapa y antes de trabajo
@@ -55,9 +59,10 @@ costoso. Checkpoint preventivo al observar <=10%; al observar <=7%, guardar cual
 avance posterior, commit y push, y detener nuevas etapas. La vigilancia sólo ocurre
 durante trabajo activo; no existe un monitor permanente fuera del chat.
 
-Próximo paso: comprobar que el commit local coincide con `origin/main`, consultar la
-ejecución CI de ese SHA y registrar su resultado. Si falla, corregir el fallo concreto,
-revalidar y crear otro checkpoint. Después retomar los pendientes anteriores según alcance.
+Próximo paso: consultar cuota y estado Git al retomar; revisar primero la descarga
+de informes desde el navegador. Para iniciar la UI: `uv run plc-verifier serve`.
+Mantener como pendientes separados la IA real y la comparación externa; requieren
+credenciales o herramientas que no forman parte de las validaciones efectuadas.
 
 ### Historial conservado
 

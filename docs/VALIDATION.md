@@ -6,6 +6,10 @@
 Ruff lint/formato y mypy pasan. `uv build` genera sdist y wheel, con el HTML de la UI
 incluido. CLI real: ejemplo normal código 0; defecto timeout_disabled código 1.
 La generación de evidencia vuelve a confirmar seis PASS y seis FAIL esperados.
+GitHub Actions también finalizó correctamente en Windows y Linux para el commit
+`ac3043bffb8927473c0efcb3cd2ec1878e92d330`:
+[ejecución 43726130985](https://github.com/GzoC/plc-logic-verifier/actions/runs/43726130985).
+Instalación, lint, formato, tipos, suite y ejemplo CLI completados; artefactos subidos.
 Incluyen tablas de TON
 PT=0/200/250 con scans de 100 ms; primer instante, PT-scan/PT/PT+scan, saturación/reset,
 cambios de PT, llamadas omitidas/duplicadas, instancias independientes, flancos iniciales,

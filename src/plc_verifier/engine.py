@@ -12,8 +12,9 @@ def checked(value: Any, typ: str, node: Node) -> Any:
     if typ == "BOOL":
         if type(value) is not bool:
             fail("BOOL value required", node)
-    elif type(value) is not int or not ((-32768 <= value <= 32767) if typ == "INT"
-                                      else (0 <= value <= TIME_MAX)):
+    elif type(value) is not int or not (
+        (-32768 <= value <= 32767) if typ == "INT" else (0 <= value <= TIME_MAX)
+    ):
         fail(f"{typ} range exceeded", node)
     return value
 
@@ -74,8 +75,7 @@ def evaluate(node: Node, values: dict[str, Any], program: Program) -> Any:
 
 
 class Engine:
-    def __init__(self, program: Program, scan_ms: int = 100,
-                 initial: dict[str, Any] | None = None):
+    def __init__(self, program: Program, scan_ms: int = 100, initial: dict[str, Any] | None = None):
         if type(scan_ms) is not int or not 1 <= scan_ms <= 60000:
             raise VerificationError("scan_ms must be 1..60000")
         self.program, self.scan_ms = program, scan_ms
@@ -122,12 +122,24 @@ class Engine:
         except VerificationError:
             self.values, self.writes = before, previous_writes
             raise
-        row: dict[str, Any] = {"scan": self.scan, "time_ms": self.time_ms,
-                               "inputs": {}, "outputs": {}, "variables": {}, "blocks": {},
-                               "writes": deepcopy(self.writes), "assertions": []}
+        row: dict[str, Any] = {
+            "scan": self.scan,
+            "time_ms": self.time_ms,
+            "inputs": {},
+            "outputs": {},
+            "variables": {},
+            "blocks": {},
+            "writes": deepcopy(self.writes),
+            "assertions": [],
+        }
         for name, symbol in self.program.symbols.items():
-            group = ("blocks" if symbol.type in {"TON", "R_TRIG"} else
-                     {"VAR_INPUT": "inputs", "VAR_OUTPUT": "outputs", "VAR": "variables"}[symbol.section])
+            group = (
+                "blocks"
+                if symbol.type in {"TON", "R_TRIG"}
+                else {"VAR_INPUT": "inputs", "VAR_OUTPUT": "outputs", "VAR": "variables"}[
+                    symbol.section
+                ]
+            )
             row[group][name] = deepcopy(self.values[name])
         self.scan += 1
         self.time_ms += self.scan_ms

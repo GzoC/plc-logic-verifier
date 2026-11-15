@@ -1,0 +1,43 @@
+# Validación y evidencia
+
+Última comprobación: 2026-11-15. Entorno local observado: Windows, Python 3.12.13, uv 0.11.19.
+
+58 pruebas automatizadas pasan también en un entorno nuevo instalado desde `uv.lock`.
+Ruff lint/formato y mypy pasan. `uv build` genera sdist y wheel, con el HTML de la UI
+incluido. CLI real: ejemplo normal código 0; defecto timeout_disabled código 1.
+La generación de evidencia vuelve a confirmar seis PASS y seis FAIL esperados.
+Incluyen tablas de TON
+PT=0/200/250 con scans de 100 ms; primer instante, PT-scan/PT/PT+scan, saturación/reset,
+cambios de PT, llamadas omitidas/duplicadas, instancias independientes, flancos iniciales,
+orden/persistencia/imágenes, aritmética, parser/tipos, YAML inválido, repetibilidad,
+no vacuidad, plazos, cancelación/timeout, seis escenarios correctos y seis mutantes.
+Interfaces: códigos CLI, cuatro formatos, escaping HTML, JUnit de ERROR, HTTP local,
+origen/token y equivalencia worker/motor. IA: dobles y ausencia de clave, sin red real.
+
+La suite usa valores esperados independientes del intérprete: tablas escritas a mano
+y requisitos de ejemplos definidos en `examples/REQUIREMENTS.md`. No es una demostración
+formal de corrección. La cobertura enumerada no implica cubrir todos los casos de ST.
+
+Registro previo de UI (2026-11-14) en Edge: carga de ejemplo, PASS de lubricación normal; FAIL de timeout_disabled;
+primer fallo scan 4/400 ms; inspector de bloques y vista previa IA sin envío.
+Captura real en `docs/evidence/ui-failure.jpg`. La espera automatizada de descarga del
+navegador agotó el timeout; revisar el registro de cierre para su comprobación posterior.
+En este checkpoint se inspeccionó la captura existente, sin repetir la interacción del
+navegador. La descarga por navegador sigue pendiente; la exportación HTTP pasa en la suite.
+
+## Comparación externa
+
+Se evaluó [MatIEC de Beremiz](https://github.com/beremiz/matiec) y la
+[guía oficial de compilación](https://beremiz.readthedocs.io/en/latest/install.html)
+(documentación Beremiz 1.5.1, consultada 2026-11-14). Requiere compilación con herramientas
+no disponibles en PATH de esta máquina: iec2c, GCC/Clang, make, flex y bison.
+No se añadió como dependencia ni se ejecutó comparación diferencial. No hay versión de
+runtime externo validada ni se declara equivalencia con un PLC comercial. Una integración
+futura debe fijar commit/toolchain y contrastar tablas independientes de la semántica.
+
+## Reproducción
+
+`uv run python scripts/collect_evidence.py` ejecuta los seis escenarios y seis mutantes,
+genera `docs/evidence/summary.json` y conserva el caso defectuoso en sus cuatro formatos.
+Los resultados no se leen para simular ni se usan como sustituto del motor.
+Las fuentes ST/YAML y sus hashes permiten recalcularlos. CI sube artefactos por sistema.

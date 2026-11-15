@@ -52,11 +52,13 @@ def main(argv=None) -> int:
     try:
         if args.command == "serve":
             from .web import serve
+
             serve(args.port)
             return 0
         if args.command == "validate":
             if args.path.suffix.lower() == ".st":
                 from .engine import Engine
+
                 Engine(parse_program(read_text(args.path)))
             else:
                 source, scenario_text = inputs(args.path, args.program)
@@ -70,30 +72,42 @@ def main(argv=None) -> int:
                 command += f" --program {shlex.quote(str(args.program))}"
             result = verify(source, text, command)
             export(result, args.output)
-            print(f'{result["status"]}: {args.output / "report.html"}')
+            print(f"{result['status']}: {args.output / 'report.html'}")
             for r in result["requirements"]:
-                print(f'  {r["id"]}: {r["status"]}')
+                print(f"  {r['id']}: {r['status']}")
             if result["error"]:
                 print(result["error"]["message"], file=sys.stderr)
             return EXIT_CODES[result["status"]]
         if args.command == "report":
-            export(validate_result(json.loads(read_text(args.result, 24 * 1024 * 1024))), args.output)
+            export(
+                validate_result(json.loads(read_text(args.result, 24 * 1024 * 1024))), args.output
+            )
             print(args.output / "report.html")
             return 0
         if args.command == "explain":
             from .ai import explain, preview_payload
+
             if args.send:
                 advice = explain(json.loads(read_text(args.payload, 24000)), send=True)
                 print(json.dumps(advice, ensure_ascii=False, indent=2))
             else:
                 if args.result is None:
-                    raise VerificationError("Provide a result.json to preview, or --payload ... --send")
+                    raise VerificationError(
+                        "Provide a result.json to preview, or --payload ... --send"
+                    )
                 result = validate_result(json.loads(read_text(args.result, 24 * 1024 * 1024)))
-                payload = preview_payload(result, read_text(args.include_program) if args.include_program else None,
-                                          args.include_comments)
+                payload = preview_payload(
+                    result,
+                    read_text(args.include_program) if args.include_program else None,
+                    args.include_comments,
+                )
                 args.payload.parent.mkdir(parents=True, exist_ok=True)
-                args.payload.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
-                print(f"Preview only; nothing sent. Review/edit {args.payload}, then explain --payload <file> --send")
+                args.payload.write_text(
+                    json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+                )
+                print(
+                    f"Preview only; nothing sent. Review/edit {args.payload}, then explain --payload <file> --send"
+                )
             return 0
     except (VerificationError, OSError, UnicodeError, ValueError) as exc:
         print(str(exc), file=sys.stderr)

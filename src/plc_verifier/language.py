@@ -1,7 +1,7 @@
 """Formal grammar, source-located AST and closed-world type checker."""
 
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, NoReturn
 
 from lark import Lark, Token, Tree, UnexpectedInput
 
@@ -52,8 +52,13 @@ NAME: /[A-Za-z_][A-Za-z0-9_]*/
 %ignore /\(\*(?s:.*?)\*\)/
 %ignore /\/\/[^\n]*/
 """
-PARSER = Lark(GRAMMAR, parser="lalr", start=["start", "expr"], propagate_positions=True,
-              maybe_placeholders=False)
+PARSER = Lark(
+    GRAMMAR,
+    parser="lalr",
+    start=["start", "expr"],
+    propagate_positions=True,
+    maybe_placeholders=False,
+)
 
 
 class VerificationError(Exception):
@@ -88,15 +93,19 @@ class Program:
     source: str
 
 
-def fail(message: str, node: Node, status: str = "ERROR") -> Any:
+def fail(message: str, node: Node, status: str = "ERROR") -> NoReturn:
     raise VerificationError(message, node.line, node.column, status)
 
 
 def ast(tree: Tree | Token) -> Any:
     if isinstance(tree, Token):
         return str(tree).upper()
-    return Node(str(tree.data), [ast(c) for c in tree.children],
-                getattr(tree.meta, "line", 1), getattr(tree.meta, "column", 1))
+    return Node(
+        str(tree.data),
+        [ast(c) for c in tree.children],
+        getattr(tree.meta, "line", 1),
+        getattr(tree.meta, "column", 1),
+    )
 
 
 def parse_tree(source: str, start: str) -> Node:
@@ -104,7 +113,7 @@ def parse_tree(source: str, start: str) -> Node:
         raise VerificationError("Source exceeds 64 KiB")
     try:
         tree = PARSER.parse(source, start=start)
-        pending = [(tree, 0)]
+        pending: list[tuple[Tree | Token, int]] = [(tree, 0)]
         count = 0
         while pending:
             item, depth = pending.pop()
@@ -115,8 +124,9 @@ def parse_tree(source: str, start: str) -> Node:
                 pending.extend((c, depth + 1) for c in item.children)
         return ast(tree)
     except UnexpectedInput as exc:
-        raise VerificationError("Unsupported or malformed ST syntax", exc.line, exc.column,
-                                "UNSUPPORTED") from exc
+        raise VerificationError(
+            "Unsupported or malformed ST syntax", exc.line, exc.column, "UNSUPPORTED"
+        ) from exc
     except RecursionError as exc:
         raise VerificationError("Nesting limit exceeded") from exc
 
@@ -142,8 +152,10 @@ def expression_type(node: Node, symbols: dict[str, Symbol]) -> str:
             if symbol.type in {"TON", "R_TRIG"}:
                 fail("Function block requires a member", node)
             return symbol.type
-        members = {"TON": {"Q": "BOOL", "ET": "TIME", "IN": "BOOL", "PT": "TIME"},
-                   "R_TRIG": {"Q": "BOOL", "CLK": "BOOL"}}
+        members = {
+            "TON": {"Q": "BOOL", "ET": "TIME", "IN": "BOOL", "PT": "TIME"},
+            "R_TRIG": {"Q": "BOOL", "CLK": "BOOL"},
+        }
         typ = members.get(symbol.type, {}).get(a[1])
         if typ is None:
             fail(f"Unsupported member {a[0]}.{a[1]}", node, "UNSUPPORTED")
@@ -239,8 +251,14 @@ def parse_program(source: str) -> Program:
                     fail("Function blocks must be internal without initializer", decl)
                 if initial and expression_type(initial[0], {}) != typ:
                     fail("Initializer must be a constant of the declared type", decl)
-                symbols[name] = Symbol(name, typ, section.args[0], initial[0] if initial else None,
-                                       decl.line, decl.column)
+                symbols[name] = Symbol(
+                    name,
+                    typ,
+                    section.args[0],
+                    initial[0] if initial else None,
+                    decl.line,
+                    decl.column,
+                )
     program = Program(root.args[0], symbols, root.args[-1], source)
     check_body(program.body, symbols)
     return program

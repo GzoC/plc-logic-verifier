@@ -8,5 +8,7 @@ __pycache__/
 dist/
 build/
 .env
+.env.*
+!.env.example
 outputs/
 .local/

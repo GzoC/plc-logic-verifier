@@ -13,11 +13,17 @@ from .engine import Engine, evaluate
 from .language import Program, VerificationError, parse_expression, parse_program
 
 NOTICE = "Verificación por simulación con alcance definido. No certifica seguridad funcional ni compatibilidad universal con PLC"
-SEMANTICS = {"version": "0.1.0", "scan": "inputs -> sequential execution -> outputs/assertions -> clock advance",
-             "duration": "[0,duration_ms)", "INT": "signed 16 bit; overflow ERROR; division toward zero",
-             "TIME": "0..2147483647 integer ms", "TON": "first true call ET=0; ET=min(now-start,PT); Q=ET>=PT; false resets; skipped holds; PT changes keep start",
-             "R_TRIG": "initial memory FALSE; Q cleared each scan; memory updated only on call",
-             "multiple_calls": "ERROR", "retention": "between scans only; new run resets"}
+SEMANTICS = {
+    "version": "0.1.0",
+    "scan": "inputs -> sequential execution -> outputs/assertions -> clock advance",
+    "duration": "[0,duration_ms)",
+    "INT": "signed 16 bit; overflow ERROR; division toward zero",
+    "TIME": "0..2147483647 integer ms",
+    "TON": "first true call ET=0; ET=min(now-start,PT); Q=ET>=PT; false resets; skipped holds; PT changes keep start",
+    "R_TRIG": "initial memory FALSE; Q cleared each scan; memory updated only on call",
+    "multiple_calls": "ERROR",
+    "retention": "between scans only; new run resets",
+}
 
 
 class StrictModel(BaseModel):
@@ -53,11 +59,16 @@ class Requirement(StrictModel):
 
     @model_validator(mode="after")
     def shape(self):
-        allowed = {"always": {"expr", "when"}, "never": {"expr", "when"},
-                   "eventually": {"expr", "when"}, "hold": {"expr", "when"},
-                   "mutex": {"steps", "when"}, "sequence": {"steps"},
-                   "response": {"trigger", "expr", "within_ms"},
-                   "latch": {"trigger", "expr", "until"}}[self.kind]
+        allowed = {
+            "always": {"expr", "when"},
+            "never": {"expr", "when"},
+            "eventually": {"expr", "when"},
+            "hold": {"expr", "when"},
+            "mutex": {"steps", "when"},
+            "sequence": {"steps"},
+            "response": {"trigger", "expr", "within_ms"},
+            "latch": {"trigger", "expr", "until"},
+        }[self.kind]
         required = allowed - {"when"}
         for name in {"expr", "when", "trigger", "until", "steps", "within_ms"}:
             v = getattr(self, name)
@@ -93,7 +104,12 @@ class Scenario(StrictModel):
             seen.add(t)
         for r in self.requirements:
             end = self.duration_ms - self.scan_ms if r.end_ms is None else r.end_ms
-            if r.start_ms > end or end >= self.duration_ms or r.start_ms % self.scan_ms or end % self.scan_ms:
+            if (
+                r.start_ms > end
+                or end >= self.duration_ms
+                or r.start_ms % self.scan_ms
+                or end % self.scan_ms
+            ):
                 raise ValueError("Requirement windows must be scan-aligned and inside duration")
         return self
 
@@ -123,11 +139,24 @@ def load_scenario(source: str) -> Scenario:
         for token in yaml.scan(source):
             if isinstance(token, (yaml.tokens.AliasToken, yaml.tokens.AnchorToken)):
                 raise ValueError("YAML aliases/anchors are not supported")
-            if isinstance(token, (yaml.tokens.BlockMappingStartToken, yaml.tokens.BlockSequenceStartToken,
-                                  yaml.tokens.FlowMappingStartToken, yaml.tokens.FlowSequenceStartToken)):
+            if isinstance(
+                token,
+                (
+                    yaml.tokens.BlockMappingStartToken,
+                    yaml.tokens.BlockSequenceStartToken,
+                    yaml.tokens.FlowMappingStartToken,
+                    yaml.tokens.FlowSequenceStartToken,
+                ),
+            ):
                 depth += 1
-            if isinstance(token, (yaml.tokens.BlockEndToken, yaml.tokens.FlowMappingEndToken,
-                                  yaml.tokens.FlowSequenceEndToken)):
+            if isinstance(
+                token,
+                (
+                    yaml.tokens.BlockEndToken,
+                    yaml.tokens.FlowMappingEndToken,
+                    yaml.tokens.FlowSequenceEndToken,
+                ),
+            ):
                 depth -= 1
             if depth > 20:
                 raise ValueError("YAML nesting limit exceeded")
@@ -140,10 +169,13 @@ def prepare(program: Program, scenario: Scenario) -> dict[str, dict[str, Any]]:
     engine = Engine(program, scenario.scan_ms, scenario.initial)
     for event in scenario.events:
         engine.set_values(event.set)
-    compiled = {}
+    compiled: dict[str, dict[str, Any]] = {}
     for r in scenario.requirements:
-        compiled[r.id] = {name: parse_expression(getattr(r, name), program)
-                          for name in ("expr", "when", "trigger", "until") if getattr(r, name) is not None}
+        compiled[r.id] = {
+            name: parse_expression(getattr(r, name), program)
+            for name in ("expr", "when", "trigger", "until")
+            if getattr(r, name) is not None
+        }
         if r.steps:
             compiled[r.id]["steps"] = [parse_expression(s, program) for s in r.steps]
     return compiled
@@ -154,8 +186,11 @@ def values_of(row):
 
 
 def assess(r: Requirement, nodes: dict[str, Any], trace: list[dict[str, Any]], program: Program):
-    window = [row for row in trace if row["time_ms"] >= r.start_ms and
-              (r.end_ms is None or row["time_ms"] <= r.end_ms)]
+    window = [
+        row
+        for row in trace
+        if row["time_ms"] >= r.start_ms and (r.end_ms is None or row["time_ms"] <= r.end_ms)
+    ]
     failures = []
     observations = 0
     satisfied = False
@@ -167,10 +202,14 @@ def assess(r: Requirement, nodes: dict[str, Any], trace: list[dict[str, Any]], p
     previous_steps = [False] * len(nodes.get("steps", []))
     for row in window:
         values = values_of(row)
+
         def ev(name, values=values):
             return evaluate(nodes[name], values, program)
+
         if "when" in nodes and not ev("when"):
-            row["assertions"].append({"id": r.id, "status": "NOT_EVALUATED", "reason": "when false"})
+            row["assertions"].append(
+                {"id": r.id, "status": "NOT_EVALUATED", "reason": "when false"}
+            )
             continue
         ok: bool | None = True
         if r.kind in {"always", "hold", "never", "eventually"}:
@@ -185,7 +224,9 @@ def assess(r: Requirement, nodes: dict[str, Any], trace: list[dict[str, Any]], p
             ok = sum(evaluate(s, values, program) for s in nodes["steps"]) <= 1
         elif r.kind == "sequence":
             if satisfied:
-                row["assertions"].append({"id": r.id, "status": "NOT_EVALUATED", "reason": "Sequence already completed"})
+                row["assertions"].append(
+                    {"id": r.id, "status": "NOT_EVALUATED", "reason": "Sequence already completed"}
+                )
                 continue
             current = [evaluate(s, values, program) for s in nodes["steps"]]
             rising = [i for i, v in enumerate(current) if v and not previous_steps[i]]
@@ -228,8 +269,12 @@ def assess(r: Requirement, nodes: dict[str, Any], trace: list[dict[str, Any]], p
                     latched, released = False, True
                 if latched:
                     ok = ev("expr")
-        row["assertions"].append({"id": r.id, "status": "FAIL" if ok is False else
-                                   "PASS" if ok is True else "NOT_EVALUATED"})
+        row["assertions"].append(
+            {
+                "id": r.id,
+                "status": "FAIL" if ok is False else "PASS" if ok is True else "NOT_EVALUATED",
+            }
+        )
         if ok is False:
             failures.append(row)
     reason = "Requirement satisfied in observed window"
@@ -247,23 +292,45 @@ def assess(r: Requirement, nodes: dict[str, Any], trace: list[dict[str, Any]], p
     elif deadlines:
         status, reason = "NOT_EVALUATED", "Response deadline exceeds observed window"
     first = failures[0] if failures else None
-    return {"id": r.id, "description": r.description, "kind": r.kind, "status": status,
-            "expected": r.model_dump(exclude_none=True), "reason": reason,
-            "observations": observations, "first_failure_scan": first["scan"] if first else None,
-            "observed": values_of(first) if first else None,
-            "related_writes": first["writes"] if first else {},
-            "evidence_scans": [max(0, first["scan"] - 2), min(len(trace) - 1, first["scan"] + 2)] if first else None,
-            "notes": "Last executed writes are evidence, not proof of root cause.",
-            "release_observed": released if r.kind == "latch" else None}
+    return {
+        "id": r.id,
+        "description": r.description,
+        "kind": r.kind,
+        "status": status,
+        "expected": r.model_dump(exclude_none=True),
+        "reason": reason,
+        "observations": observations,
+        "first_failure_scan": first["scan"] if first else None,
+        "observed": values_of(first) if first else None,
+        "related_writes": first["writes"] if first else {},
+        "evidence_scans": [max(0, first["scan"] - 2), min(len(trace) - 1, first["scan"] + 2)]
+        if first
+        else None,
+        "notes": "Last executed writes are evidence, not proof of root cause.",
+        "release_observed": released if r.kind == "latch" else None,
+    }
 
 
-def verify(source: str, scenario_source: str, command: str = "plc-verifier run <scenario.yml>",
-           timeout_s: float = 10.0, cancelled=None) -> dict[str, Any]:
-    result: dict[str, Any] = {"schema_version": 1, "engine_version": __version__, "status": "ERROR",
-                              "notice": NOTICE, "semantics": SEMANTICS,
-                              "program_sha256": hashlib.sha256(source.encode()).hexdigest(),
-                              "scenario_sha256": hashlib.sha256(scenario_source.encode()).hexdigest(),
-                              "reproduce": command, "requirements": [], "trace": [], "error": None}
+def verify(
+    source: str,
+    scenario_source: str,
+    command: str = "plc-verifier run <scenario.yml>",
+    timeout_s: float = 10.0,
+    cancelled=None,
+) -> dict[str, Any]:
+    result: dict[str, Any] = {
+        "schema_version": 1,
+        "engine_version": __version__,
+        "status": "ERROR",
+        "notice": NOTICE,
+        "semantics": SEMANTICS,
+        "program_sha256": hashlib.sha256(source.encode()).hexdigest(),
+        "scenario_sha256": hashlib.sha256(scenario_source.encode()).hexdigest(),
+        "reproduce": command,
+        "requirements": [],
+        "trace": [],
+        "error": None,
+    }
     scenario = None
     try:
         scenario = load_scenario(scenario_source)
@@ -271,8 +338,10 @@ def verify(source: str, scenario_source: str, command: str = "plc-verifier run <
         program = parse_program(source)
         compiled = prepare(program, scenario)
         engine = Engine(program, scenario.scan_ms, scenario.initial)
-        events = {(e.scan if e.scan is not None else int(e.time_ms or 0) // scenario.scan_ms): e.set
-                  for e in scenario.events}
+        events = {
+            (e.scan if e.scan is not None else int(e.time_ms or 0) // scenario.scan_ms): e.set
+            for e in scenario.events
+        }
         start = time.monotonic()
         size = 0
         for scan in range(scenario.duration_ms // scenario.scan_ms):
@@ -288,12 +357,24 @@ def verify(source: str, scenario_source: str, command: str = "plc-verifier run <
                 raise VerificationError("Requirement evaluation timeout")
             result["requirements"].append(assess(r, compiled[r.id], result["trace"], program))
         statuses = {r["status"] for r in result["requirements"]}
-        result["status"] = "FAIL" if "FAIL" in statuses else "NOT_EVALUATED" if "NOT_EVALUATED" in statuses else "PASS"
+        result["status"] = (
+            "FAIL"
+            if "FAIL" in statuses
+            else "NOT_EVALUATED"
+            if "NOT_EVALUATED" in statuses
+            else "PASS"
+        )
     except VerificationError as exc:
         result["status"] = exc.status
         result["error"] = {"message": str(exc), "line": exc.line, "column": exc.column}
         if scenario:
-            result["requirements"] = [{"id": r.id, "description": r.description,
-                                        "status": "NOT_EVALUATED", "reason": "Run did not complete"}
-                                       for r in scenario.requirements]
+            result["requirements"] = [
+                {
+                    "id": r.id,
+                    "description": r.description,
+                    "status": "NOT_EVALUATED",
+                    "reason": "Run did not complete",
+                }
+                for r in scenario.requirements
+            ]
     return result

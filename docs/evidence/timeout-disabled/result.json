@@ -1,0 +1,1717 @@
+{
+  "schema_version": 1,
+  "engine_version": "0.1.0",
+  "status": "FAIL",
+  "notice": "Verificación por simulación con alcance definido. No certifica seguridad funcional ni compatibilidad universal con PLC",
+  "semantics": {
+    "version": "0.1.0",
+    "scan": "inputs -> sequential execution -> outputs/assertions -> clock advance",
+    "duration": "[0,duration_ms)",
+    "INT": "signed 16 bit; overflow ERROR; division toward zero",
+    "TIME": "0..2147483647 integer ms",
+    "TON": "first true call ET=0; ET=min(now-start,PT); Q=ET>=PT; false resets; skipped holds; PT changes keep start",
+    "R_TRIG": "initial memory FALSE; Q cleared each scan; memory updated only on call",
+    "multiple_calls": "ERROR",
+    "retention": "between scans only; new run resets"
+  },
+  "program_sha256": "d8eae3e0b5137a9106f704b2258a58789e4c13d6895d031864b854d65bbc7256",
+  "scenario_sha256": "17b288ebcd4c42e6486dff185e44ea2acdcca9a0ae3a3155d3e3eb1b12648131",
+  "reproduce": "plc-verifier run examples/lubrication/fault.yaml --program examples/lubrication/defects/timeout_disabled.st",
+  "requirements": [
+    {
+      "id": "L03",
+      "description": "Timeout de presión enclava falla",
+      "kind": "hold",
+      "status": "FAIL",
+      "expected": {
+        "id": "L03",
+        "description": "Timeout de presión enclava falla",
+        "kind": "hold",
+        "expr": "Fault AND NOT Pump",
+        "start_ms": 400,
+        "end_ms": 700
+      },
+      "reason": "Observed requirement violation",
+      "observations": 4,
+      "first_failure_scan": 4,
+      "observed": {
+        "START": true,
+        "STOP": false,
+        "LEVELOK": true,
+        "PRESSURE": false,
+        "ACK": false,
+        "PUMP": true,
+        "FAULT": false,
+        "STATE": 1,
+        "STARTEDGE": {
+          "CLK": true,
+          "Q": false,
+          "memory": true
+        },
+        "LUBE": {
+          "IN": true,
+          "PT": 500,
+          "ET": 300,
+          "Q": false,
+          "start_ms": 100
+        },
+        "PAUSETIMER": {
+          "IN": false,
+          "PT": 300,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        },
+        "PRESSURETIMER": {
+          "IN": true,
+          "PT": 300,
+          "ET": 300,
+          "Q": true,
+          "start_ms": 100
+        }
+      },
+      "related_writes": {
+        "STARTEDGE": {
+          "line": 14,
+          "column": 1,
+          "scan": 4
+        },
+        "LUBE": {
+          "line": 15,
+          "column": 1,
+          "scan": 4
+        },
+        "PAUSETIMER": {
+          "line": 16,
+          "column": 1,
+          "scan": 4
+        },
+        "PRESSURETIMER": {
+          "line": 17,
+          "column": 1,
+          "scan": 4
+        },
+        "STATE": {
+          "line": 25,
+          "column": 32,
+          "scan": 0
+        },
+        "PUMP": {
+          "line": 30,
+          "column": 1,
+          "scan": 4
+        }
+      },
+      "evidence_scans": [
+        2,
+        6
+      ],
+      "notes": "Last executed writes are evidence, not proof of root cause.",
+      "release_observed": null
+    },
+    {
+      "id": "L05",
+      "description": "Recuperar presión no reconoce la falla",
+      "kind": "latch",
+      "status": "PASS",
+      "expected": {
+        "id": "L05",
+        "description": "Recuperar presión no reconoce la falla",
+        "kind": "latch",
+        "expr": "Fault",
+        "trigger": "Fault",
+        "until": "Ack AND LevelOK AND Pressure AND NOT Start AND NOT Stop",
+        "start_ms": 0
+      },
+      "reason": "Requirement satisfied in observed window",
+      "observations": 1,
+      "first_failure_scan": null,
+      "observed": null,
+      "related_writes": {},
+      "evidence_scans": null,
+      "notes": "Last executed writes are evidence, not proof of root cause.",
+      "release_observed": false
+    },
+    {
+      "id": "L06",
+      "description": "Reconocimiento inválido con Start sostenido",
+      "kind": "hold",
+      "status": "FAIL",
+      "expected": {
+        "id": "L06",
+        "description": "Reconocimiento inválido con Start sostenido",
+        "kind": "hold",
+        "expr": "Fault",
+        "start_ms": 700,
+        "end_ms": 700
+      },
+      "reason": "Observed requirement violation",
+      "observations": 1,
+      "first_failure_scan": 7,
+      "observed": {
+        "START": true,
+        "STOP": false,
+        "LEVELOK": true,
+        "PRESSURE": true,
+        "ACK": true,
+        "PUMP": false,
+        "FAULT": false,
+        "STATE": 2,
+        "STARTEDGE": {
+          "CLK": true,
+          "Q": false,
+          "memory": true
+        },
+        "LUBE": {
+          "IN": false,
+          "PT": 500,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        },
+        "PAUSETIMER": {
+          "IN": true,
+          "PT": 300,
+          "ET": 0,
+          "Q": false,
+          "start_ms": 700
+        },
+        "PRESSURETIMER": {
+          "IN": false,
+          "PT": 300,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        }
+      },
+      "related_writes": {
+        "STARTEDGE": {
+          "line": 14,
+          "column": 1,
+          "scan": 7
+        },
+        "LUBE": {
+          "line": 15,
+          "column": 1,
+          "scan": 7
+        },
+        "PAUSETIMER": {
+          "line": 16,
+          "column": 1,
+          "scan": 7
+        },
+        "PRESSURETIMER": {
+          "line": 17,
+          "column": 1,
+          "scan": 7
+        },
+        "STATE": {
+          "line": 26,
+          "column": 27,
+          "scan": 6
+        },
+        "PUMP": {
+          "line": 30,
+          "column": 1,
+          "scan": 7
+        }
+      },
+      "evidence_scans": [
+        5,
+        9
+      ],
+      "notes": "Last executed writes are evidence, not proof of root cause.",
+      "release_observed": null
+    },
+    {
+      "id": "L07",
+      "description": "Reconocimiento válido no rearranca",
+      "kind": "hold",
+      "status": "PASS",
+      "expected": {
+        "id": "L07",
+        "description": "Reconocimiento válido no rearranca",
+        "kind": "hold",
+        "expr": "NOT Pump AND NOT Fault",
+        "start_ms": 800,
+        "end_ms": 800
+      },
+      "reason": "Requirement satisfied in observed window",
+      "observations": 1,
+      "first_failure_scan": null,
+      "observed": null,
+      "related_writes": {},
+      "evidence_scans": null,
+      "notes": "Last executed writes are evidence, not proof of root cause.",
+      "release_observed": null
+    },
+    {
+      "id": "L07-start",
+      "description": "Nueva orden explícita",
+      "kind": "hold",
+      "status": "FAIL",
+      "expected": {
+        "id": "L07-start",
+        "description": "Nueva orden explícita",
+        "kind": "hold",
+        "expr": "Pump",
+        "start_ms": 900,
+        "end_ms": 1000
+      },
+      "reason": "Observed requirement violation",
+      "observations": 2,
+      "first_failure_scan": 9,
+      "observed": {
+        "START": true,
+        "STOP": false,
+        "LEVELOK": true,
+        "PRESSURE": true,
+        "ACK": false,
+        "PUMP": false,
+        "FAULT": false,
+        "STATE": 2,
+        "STARTEDGE": {
+          "CLK": true,
+          "Q": true,
+          "memory": true
+        },
+        "LUBE": {
+          "IN": false,
+          "PT": 500,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        },
+        "PAUSETIMER": {
+          "IN": true,
+          "PT": 300,
+          "ET": 200,
+          "Q": false,
+          "start_ms": 700
+        },
+        "PRESSURETIMER": {
+          "IN": false,
+          "PT": 300,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        }
+      },
+      "related_writes": {
+        "STARTEDGE": {
+          "line": 14,
+          "column": 1,
+          "scan": 9
+        },
+        "LUBE": {
+          "line": 15,
+          "column": 1,
+          "scan": 9
+        },
+        "PAUSETIMER": {
+          "line": 16,
+          "column": 1,
+          "scan": 9
+        },
+        "PRESSURETIMER": {
+          "line": 17,
+          "column": 1,
+          "scan": 9
+        },
+        "STATE": {
+          "line": 26,
+          "column": 27,
+          "scan": 6
+        },
+        "PUMP": {
+          "line": 30,
+          "column": 1,
+          "scan": 9
+        },
+        "FAULT": {
+          "line": 20,
+          "column": 65,
+          "scan": 8
+        }
+      },
+      "evidence_scans": [
+        7,
+        11
+      ],
+      "notes": "Last executed writes are evidence, not proof of root cause.",
+      "release_observed": null
+    },
+    {
+      "id": "L04-level",
+      "description": "Sin nivel no hay salida",
+      "kind": "never",
+      "status": "PASS",
+      "expected": {
+        "id": "L04-level",
+        "description": "Sin nivel no hay salida",
+        "kind": "never",
+        "expr": "Pump",
+        "when": "NOT LevelOK",
+        "start_ms": 0
+      },
+      "reason": "Requirement satisfied in observed window",
+      "observations": 2,
+      "first_failure_scan": null,
+      "observed": null,
+      "related_writes": {},
+      "evidence_scans": null,
+      "notes": "Last executed writes are evidence, not proof of root cause.",
+      "release_observed": null
+    }
+  ],
+  "trace": [
+    {
+      "scan": 0,
+      "time_ms": 0,
+      "inputs": {
+        "START": true,
+        "STOP": false,
+        "LEVELOK": true,
+        "PRESSURE": false,
+        "ACK": false
+      },
+      "outputs": {
+        "PUMP": true,
+        "FAULT": false
+      },
+      "variables": {
+        "STATE": 1
+      },
+      "blocks": {
+        "STARTEDGE": {
+          "CLK": true,
+          "Q": true,
+          "memory": true
+        },
+        "LUBE": {
+          "IN": false,
+          "PT": 500,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        },
+        "PAUSETIMER": {
+          "IN": false,
+          "PT": 300,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        },
+        "PRESSURETIMER": {
+          "IN": false,
+          "PT": 300,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        }
+      },
+      "writes": {
+        "STARTEDGE": {
+          "line": 14,
+          "column": 1,
+          "scan": 0
+        },
+        "LUBE": {
+          "line": 15,
+          "column": 1,
+          "scan": 0
+        },
+        "PAUSETIMER": {
+          "line": 16,
+          "column": 1,
+          "scan": 0
+        },
+        "PRESSURETIMER": {
+          "line": 17,
+          "column": 1,
+          "scan": 0
+        },
+        "STATE": {
+          "line": 25,
+          "column": 32,
+          "scan": 0
+        },
+        "PUMP": {
+          "line": 30,
+          "column": 1,
+          "scan": 0
+        }
+      },
+      "assertions": [
+        {
+          "id": "L05",
+          "status": "NOT_EVALUATED"
+        },
+        {
+          "id": "L04-level",
+          "status": "NOT_EVALUATED",
+          "reason": "when false"
+        }
+      ]
+    },
+    {
+      "scan": 1,
+      "time_ms": 100,
+      "inputs": {
+        "START": true,
+        "STOP": false,
+        "LEVELOK": true,
+        "PRESSURE": false,
+        "ACK": false
+      },
+      "outputs": {
+        "PUMP": true,
+        "FAULT": false
+      },
+      "variables": {
+        "STATE": 1
+      },
+      "blocks": {
+        "STARTEDGE": {
+          "CLK": true,
+          "Q": false,
+          "memory": true
+        },
+        "LUBE": {
+          "IN": true,
+          "PT": 500,
+          "ET": 0,
+          "Q": false,
+          "start_ms": 100
+        },
+        "PAUSETIMER": {
+          "IN": false,
+          "PT": 300,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        },
+        "PRESSURETIMER": {
+          "IN": true,
+          "PT": 300,
+          "ET": 0,
+          "Q": false,
+          "start_ms": 100
+        }
+      },
+      "writes": {
+        "STARTEDGE": {
+          "line": 14,
+          "column": 1,
+          "scan": 1
+        },
+        "LUBE": {
+          "line": 15,
+          "column": 1,
+          "scan": 1
+        },
+        "PAUSETIMER": {
+          "line": 16,
+          "column": 1,
+          "scan": 1
+        },
+        "PRESSURETIMER": {
+          "line": 17,
+          "column": 1,
+          "scan": 1
+        },
+        "STATE": {
+          "line": 25,
+          "column": 32,
+          "scan": 0
+        },
+        "PUMP": {
+          "line": 30,
+          "column": 1,
+          "scan": 1
+        }
+      },
+      "assertions": [
+        {
+          "id": "L05",
+          "status": "NOT_EVALUATED"
+        },
+        {
+          "id": "L04-level",
+          "status": "NOT_EVALUATED",
+          "reason": "when false"
+        }
+      ]
+    },
+    {
+      "scan": 2,
+      "time_ms": 200,
+      "inputs": {
+        "START": true,
+        "STOP": false,
+        "LEVELOK": true,
+        "PRESSURE": false,
+        "ACK": false
+      },
+      "outputs": {
+        "PUMP": true,
+        "FAULT": false
+      },
+      "variables": {
+        "STATE": 1
+      },
+      "blocks": {
+        "STARTEDGE": {
+          "CLK": true,
+          "Q": false,
+          "memory": true
+        },
+        "LUBE": {
+          "IN": true,
+          "PT": 500,
+          "ET": 100,
+          "Q": false,
+          "start_ms": 100
+        },
+        "PAUSETIMER": {
+          "IN": false,
+          "PT": 300,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        },
+        "PRESSURETIMER": {
+          "IN": true,
+          "PT": 300,
+          "ET": 100,
+          "Q": false,
+          "start_ms": 100
+        }
+      },
+      "writes": {
+        "STARTEDGE": {
+          "line": 14,
+          "column": 1,
+          "scan": 2
+        },
+        "LUBE": {
+          "line": 15,
+          "column": 1,
+          "scan": 2
+        },
+        "PAUSETIMER": {
+          "line": 16,
+          "column": 1,
+          "scan": 2
+        },
+        "PRESSURETIMER": {
+          "line": 17,
+          "column": 1,
+          "scan": 2
+        },
+        "STATE": {
+          "line": 25,
+          "column": 32,
+          "scan": 0
+        },
+        "PUMP": {
+          "line": 30,
+          "column": 1,
+          "scan": 2
+        }
+      },
+      "assertions": [
+        {
+          "id": "L05",
+          "status": "NOT_EVALUATED"
+        },
+        {
+          "id": "L04-level",
+          "status": "NOT_EVALUATED",
+          "reason": "when false"
+        }
+      ]
+    },
+    {
+      "scan": 3,
+      "time_ms": 300,
+      "inputs": {
+        "START": true,
+        "STOP": false,
+        "LEVELOK": true,
+        "PRESSURE": false,
+        "ACK": false
+      },
+      "outputs": {
+        "PUMP": true,
+        "FAULT": false
+      },
+      "variables": {
+        "STATE": 1
+      },
+      "blocks": {
+        "STARTEDGE": {
+          "CLK": true,
+          "Q": false,
+          "memory": true
+        },
+        "LUBE": {
+          "IN": true,
+          "PT": 500,
+          "ET": 200,
+          "Q": false,
+          "start_ms": 100
+        },
+        "PAUSETIMER": {
+          "IN": false,
+          "PT": 300,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        },
+        "PRESSURETIMER": {
+          "IN": true,
+          "PT": 300,
+          "ET": 200,
+          "Q": false,
+          "start_ms": 100
+        }
+      },
+      "writes": {
+        "STARTEDGE": {
+          "line": 14,
+          "column": 1,
+          "scan": 3
+        },
+        "LUBE": {
+          "line": 15,
+          "column": 1,
+          "scan": 3
+        },
+        "PAUSETIMER": {
+          "line": 16,
+          "column": 1,
+          "scan": 3
+        },
+        "PRESSURETIMER": {
+          "line": 17,
+          "column": 1,
+          "scan": 3
+        },
+        "STATE": {
+          "line": 25,
+          "column": 32,
+          "scan": 0
+        },
+        "PUMP": {
+          "line": 30,
+          "column": 1,
+          "scan": 3
+        }
+      },
+      "assertions": [
+        {
+          "id": "L05",
+          "status": "NOT_EVALUATED"
+        },
+        {
+          "id": "L04-level",
+          "status": "NOT_EVALUATED",
+          "reason": "when false"
+        }
+      ]
+    },
+    {
+      "scan": 4,
+      "time_ms": 400,
+      "inputs": {
+        "START": true,
+        "STOP": false,
+        "LEVELOK": true,
+        "PRESSURE": false,
+        "ACK": false
+      },
+      "outputs": {
+        "PUMP": true,
+        "FAULT": false
+      },
+      "variables": {
+        "STATE": 1
+      },
+      "blocks": {
+        "STARTEDGE": {
+          "CLK": true,
+          "Q": false,
+          "memory": true
+        },
+        "LUBE": {
+          "IN": true,
+          "PT": 500,
+          "ET": 300,
+          "Q": false,
+          "start_ms": 100
+        },
+        "PAUSETIMER": {
+          "IN": false,
+          "PT": 300,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        },
+        "PRESSURETIMER": {
+          "IN": true,
+          "PT": 300,
+          "ET": 300,
+          "Q": true,
+          "start_ms": 100
+        }
+      },
+      "writes": {
+        "STARTEDGE": {
+          "line": 14,
+          "column": 1,
+          "scan": 4
+        },
+        "LUBE": {
+          "line": 15,
+          "column": 1,
+          "scan": 4
+        },
+        "PAUSETIMER": {
+          "line": 16,
+          "column": 1,
+          "scan": 4
+        },
+        "PRESSURETIMER": {
+          "line": 17,
+          "column": 1,
+          "scan": 4
+        },
+        "STATE": {
+          "line": 25,
+          "column": 32,
+          "scan": 0
+        },
+        "PUMP": {
+          "line": 30,
+          "column": 1,
+          "scan": 4
+        }
+      },
+      "assertions": [
+        {
+          "id": "L03",
+          "status": "FAIL"
+        },
+        {
+          "id": "L05",
+          "status": "NOT_EVALUATED"
+        },
+        {
+          "id": "L04-level",
+          "status": "NOT_EVALUATED",
+          "reason": "when false"
+        }
+      ]
+    },
+    {
+      "scan": 5,
+      "time_ms": 500,
+      "inputs": {
+        "START": true,
+        "STOP": false,
+        "LEVELOK": true,
+        "PRESSURE": false,
+        "ACK": false
+      },
+      "outputs": {
+        "PUMP": true,
+        "FAULT": false
+      },
+      "variables": {
+        "STATE": 1
+      },
+      "blocks": {
+        "STARTEDGE": {
+          "CLK": true,
+          "Q": false,
+          "memory": true
+        },
+        "LUBE": {
+          "IN": true,
+          "PT": 500,
+          "ET": 400,
+          "Q": false,
+          "start_ms": 100
+        },
+        "PAUSETIMER": {
+          "IN": false,
+          "PT": 300,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        },
+        "PRESSURETIMER": {
+          "IN": true,
+          "PT": 300,
+          "ET": 300,
+          "Q": true,
+          "start_ms": 100
+        }
+      },
+      "writes": {
+        "STARTEDGE": {
+          "line": 14,
+          "column": 1,
+          "scan": 5
+        },
+        "LUBE": {
+          "line": 15,
+          "column": 1,
+          "scan": 5
+        },
+        "PAUSETIMER": {
+          "line": 16,
+          "column": 1,
+          "scan": 5
+        },
+        "PRESSURETIMER": {
+          "line": 17,
+          "column": 1,
+          "scan": 5
+        },
+        "STATE": {
+          "line": 25,
+          "column": 32,
+          "scan": 0
+        },
+        "PUMP": {
+          "line": 30,
+          "column": 1,
+          "scan": 5
+        }
+      },
+      "assertions": [
+        {
+          "id": "L03",
+          "status": "FAIL"
+        },
+        {
+          "id": "L05",
+          "status": "NOT_EVALUATED"
+        },
+        {
+          "id": "L04-level",
+          "status": "NOT_EVALUATED",
+          "reason": "when false"
+        }
+      ]
+    },
+    {
+      "scan": 6,
+      "time_ms": 600,
+      "inputs": {
+        "START": true,
+        "STOP": false,
+        "LEVELOK": true,
+        "PRESSURE": true,
+        "ACK": false
+      },
+      "outputs": {
+        "PUMP": false,
+        "FAULT": false
+      },
+      "variables": {
+        "STATE": 2
+      },
+      "blocks": {
+        "STARTEDGE": {
+          "CLK": true,
+          "Q": false,
+          "memory": true
+        },
+        "LUBE": {
+          "IN": true,
+          "PT": 500,
+          "ET": 500,
+          "Q": true,
+          "start_ms": 100
+        },
+        "PAUSETIMER": {
+          "IN": false,
+          "PT": 300,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        },
+        "PRESSURETIMER": {
+          "IN": false,
+          "PT": 300,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        }
+      },
+      "writes": {
+        "STARTEDGE": {
+          "line": 14,
+          "column": 1,
+          "scan": 6
+        },
+        "LUBE": {
+          "line": 15,
+          "column": 1,
+          "scan": 6
+        },
+        "PAUSETIMER": {
+          "line": 16,
+          "column": 1,
+          "scan": 6
+        },
+        "PRESSURETIMER": {
+          "line": 17,
+          "column": 1,
+          "scan": 6
+        },
+        "STATE": {
+          "line": 26,
+          "column": 27,
+          "scan": 6
+        },
+        "PUMP": {
+          "line": 30,
+          "column": 1,
+          "scan": 6
+        }
+      },
+      "assertions": [
+        {
+          "id": "L03",
+          "status": "FAIL"
+        },
+        {
+          "id": "L05",
+          "status": "NOT_EVALUATED"
+        },
+        {
+          "id": "L04-level",
+          "status": "NOT_EVALUATED",
+          "reason": "when false"
+        }
+      ]
+    },
+    {
+      "scan": 7,
+      "time_ms": 700,
+      "inputs": {
+        "START": true,
+        "STOP": false,
+        "LEVELOK": true,
+        "PRESSURE": true,
+        "ACK": true
+      },
+      "outputs": {
+        "PUMP": false,
+        "FAULT": false
+      },
+      "variables": {
+        "STATE": 2
+      },
+      "blocks": {
+        "STARTEDGE": {
+          "CLK": true,
+          "Q": false,
+          "memory": true
+        },
+        "LUBE": {
+          "IN": false,
+          "PT": 500,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        },
+        "PAUSETIMER": {
+          "IN": true,
+          "PT": 300,
+          "ET": 0,
+          "Q": false,
+          "start_ms": 700
+        },
+        "PRESSURETIMER": {
+          "IN": false,
+          "PT": 300,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        }
+      },
+      "writes": {
+        "STARTEDGE": {
+          "line": 14,
+          "column": 1,
+          "scan": 7
+        },
+        "LUBE": {
+          "line": 15,
+          "column": 1,
+          "scan": 7
+        },
+        "PAUSETIMER": {
+          "line": 16,
+          "column": 1,
+          "scan": 7
+        },
+        "PRESSURETIMER": {
+          "line": 17,
+          "column": 1,
+          "scan": 7
+        },
+        "STATE": {
+          "line": 26,
+          "column": 27,
+          "scan": 6
+        },
+        "PUMP": {
+          "line": 30,
+          "column": 1,
+          "scan": 7
+        }
+      },
+      "assertions": [
+        {
+          "id": "L03",
+          "status": "FAIL"
+        },
+        {
+          "id": "L05",
+          "status": "NOT_EVALUATED"
+        },
+        {
+          "id": "L06",
+          "status": "FAIL"
+        },
+        {
+          "id": "L04-level",
+          "status": "NOT_EVALUATED",
+          "reason": "when false"
+        }
+      ]
+    },
+    {
+      "scan": 8,
+      "time_ms": 800,
+      "inputs": {
+        "START": false,
+        "STOP": false,
+        "LEVELOK": true,
+        "PRESSURE": true,
+        "ACK": true
+      },
+      "outputs": {
+        "PUMP": false,
+        "FAULT": false
+      },
+      "variables": {
+        "STATE": 2
+      },
+      "blocks": {
+        "STARTEDGE": {
+          "CLK": false,
+          "Q": false,
+          "memory": false
+        },
+        "LUBE": {
+          "IN": false,
+          "PT": 500,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        },
+        "PAUSETIMER": {
+          "IN": true,
+          "PT": 300,
+          "ET": 100,
+          "Q": false,
+          "start_ms": 700
+        },
+        "PRESSURETIMER": {
+          "IN": false,
+          "PT": 300,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        }
+      },
+      "writes": {
+        "STARTEDGE": {
+          "line": 14,
+          "column": 1,
+          "scan": 8
+        },
+        "LUBE": {
+          "line": 15,
+          "column": 1,
+          "scan": 8
+        },
+        "PAUSETIMER": {
+          "line": 16,
+          "column": 1,
+          "scan": 8
+        },
+        "PRESSURETIMER": {
+          "line": 17,
+          "column": 1,
+          "scan": 8
+        },
+        "STATE": {
+          "line": 26,
+          "column": 27,
+          "scan": 6
+        },
+        "PUMP": {
+          "line": 30,
+          "column": 1,
+          "scan": 8
+        },
+        "FAULT": {
+          "line": 20,
+          "column": 65,
+          "scan": 8
+        }
+      },
+      "assertions": [
+        {
+          "id": "L05",
+          "status": "NOT_EVALUATED"
+        },
+        {
+          "id": "L07",
+          "status": "PASS"
+        },
+        {
+          "id": "L04-level",
+          "status": "NOT_EVALUATED",
+          "reason": "when false"
+        }
+      ]
+    },
+    {
+      "scan": 9,
+      "time_ms": 900,
+      "inputs": {
+        "START": true,
+        "STOP": false,
+        "LEVELOK": true,
+        "PRESSURE": true,
+        "ACK": false
+      },
+      "outputs": {
+        "PUMP": false,
+        "FAULT": false
+      },
+      "variables": {
+        "STATE": 2
+      },
+      "blocks": {
+        "STARTEDGE": {
+          "CLK": true,
+          "Q": true,
+          "memory": true
+        },
+        "LUBE": {
+          "IN": false,
+          "PT": 500,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        },
+        "PAUSETIMER": {
+          "IN": true,
+          "PT": 300,
+          "ET": 200,
+          "Q": false,
+          "start_ms": 700
+        },
+        "PRESSURETIMER": {
+          "IN": false,
+          "PT": 300,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        }
+      },
+      "writes": {
+        "STARTEDGE": {
+          "line": 14,
+          "column": 1,
+          "scan": 9
+        },
+        "LUBE": {
+          "line": 15,
+          "column": 1,
+          "scan": 9
+        },
+        "PAUSETIMER": {
+          "line": 16,
+          "column": 1,
+          "scan": 9
+        },
+        "PRESSURETIMER": {
+          "line": 17,
+          "column": 1,
+          "scan": 9
+        },
+        "STATE": {
+          "line": 26,
+          "column": 27,
+          "scan": 6
+        },
+        "PUMP": {
+          "line": 30,
+          "column": 1,
+          "scan": 9
+        },
+        "FAULT": {
+          "line": 20,
+          "column": 65,
+          "scan": 8
+        }
+      },
+      "assertions": [
+        {
+          "id": "L05",
+          "status": "NOT_EVALUATED"
+        },
+        {
+          "id": "L07-start",
+          "status": "FAIL"
+        },
+        {
+          "id": "L04-level",
+          "status": "NOT_EVALUATED",
+          "reason": "when false"
+        }
+      ]
+    },
+    {
+      "scan": 10,
+      "time_ms": 1000,
+      "inputs": {
+        "START": true,
+        "STOP": false,
+        "LEVELOK": true,
+        "PRESSURE": true,
+        "ACK": false
+      },
+      "outputs": {
+        "PUMP": true,
+        "FAULT": false
+      },
+      "variables": {
+        "STATE": 1
+      },
+      "blocks": {
+        "STARTEDGE": {
+          "CLK": true,
+          "Q": false,
+          "memory": true
+        },
+        "LUBE": {
+          "IN": false,
+          "PT": 500,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        },
+        "PAUSETIMER": {
+          "IN": true,
+          "PT": 300,
+          "ET": 300,
+          "Q": true,
+          "start_ms": 700
+        },
+        "PRESSURETIMER": {
+          "IN": false,
+          "PT": 300,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        }
+      },
+      "writes": {
+        "STARTEDGE": {
+          "line": 14,
+          "column": 1,
+          "scan": 10
+        },
+        "LUBE": {
+          "line": 15,
+          "column": 1,
+          "scan": 10
+        },
+        "PAUSETIMER": {
+          "line": 16,
+          "column": 1,
+          "scan": 10
+        },
+        "PRESSURETIMER": {
+          "line": 17,
+          "column": 1,
+          "scan": 10
+        },
+        "STATE": {
+          "line": 27,
+          "column": 33,
+          "scan": 10
+        },
+        "PUMP": {
+          "line": 30,
+          "column": 1,
+          "scan": 10
+        },
+        "FAULT": {
+          "line": 20,
+          "column": 65,
+          "scan": 8
+        }
+      },
+      "assertions": [
+        {
+          "id": "L05",
+          "status": "NOT_EVALUATED"
+        },
+        {
+          "id": "L07-start",
+          "status": "PASS"
+        },
+        {
+          "id": "L04-level",
+          "status": "NOT_EVALUATED",
+          "reason": "when false"
+        }
+      ]
+    },
+    {
+      "scan": 11,
+      "time_ms": 1100,
+      "inputs": {
+        "START": true,
+        "STOP": false,
+        "LEVELOK": false,
+        "PRESSURE": true,
+        "ACK": false
+      },
+      "outputs": {
+        "PUMP": false,
+        "FAULT": true
+      },
+      "variables": {
+        "STATE": 0
+      },
+      "blocks": {
+        "STARTEDGE": {
+          "CLK": true,
+          "Q": false,
+          "memory": true
+        },
+        "LUBE": {
+          "IN": true,
+          "PT": 500,
+          "ET": 0,
+          "Q": false,
+          "start_ms": 1100
+        },
+        "PAUSETIMER": {
+          "IN": false,
+          "PT": 300,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        },
+        "PRESSURETIMER": {
+          "IN": false,
+          "PT": 300,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        }
+      },
+      "writes": {
+        "STARTEDGE": {
+          "line": 14,
+          "column": 1,
+          "scan": 11
+        },
+        "LUBE": {
+          "line": 15,
+          "column": 1,
+          "scan": 11
+        },
+        "PAUSETIMER": {
+          "line": 16,
+          "column": 1,
+          "scan": 11
+        },
+        "PRESSURETIMER": {
+          "line": 17,
+          "column": 1,
+          "scan": 11
+        },
+        "STATE": {
+          "line": 22,
+          "column": 5,
+          "scan": 11
+        },
+        "PUMP": {
+          "line": 30,
+          "column": 1,
+          "scan": 11
+        },
+        "FAULT": {
+          "line": 19,
+          "column": 38,
+          "scan": 11
+        }
+      },
+      "assertions": [
+        {
+          "id": "L05",
+          "status": "PASS"
+        },
+        {
+          "id": "L04-level",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "scan": 12,
+      "time_ms": 1200,
+      "inputs": {
+        "START": true,
+        "STOP": false,
+        "LEVELOK": false,
+        "PRESSURE": true,
+        "ACK": false
+      },
+      "outputs": {
+        "PUMP": false,
+        "FAULT": true
+      },
+      "variables": {
+        "STATE": 0
+      },
+      "blocks": {
+        "STARTEDGE": {
+          "CLK": true,
+          "Q": false,
+          "memory": true
+        },
+        "LUBE": {
+          "IN": false,
+          "PT": 500,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        },
+        "PAUSETIMER": {
+          "IN": false,
+          "PT": 300,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        },
+        "PRESSURETIMER": {
+          "IN": false,
+          "PT": 300,
+          "ET": 0,
+          "Q": false,
+          "start_ms": null
+        }
+      },
+      "writes": {
+        "STARTEDGE": {
+          "line": 14,
+          "column": 1,
+          "scan": 12
+        },
+        "LUBE": {
+          "line": 15,
+          "column": 1,
+          "scan": 12
+        },
+        "PAUSETIMER": {
+          "line": 16,
+          "column": 1,
+          "scan": 12
+        },
+        "PRESSURETIMER": {
+          "line": 17,
+          "column": 1,
+          "scan": 12
+        },
+        "STATE": {
+          "line": 22,
+          "column": 5,
+          "scan": 12
+        },
+        "PUMP": {
+          "line": 30,
+          "column": 1,
+          "scan": 12
+        },
+        "FAULT": {
+          "line": 19,
+          "column": 38,
+          "scan": 11
+        }
+      },
+      "assertions": [
+        {
+          "id": "L05",
+          "status": "PASS"
+        },
+        {
+          "id": "L04-level",
+          "status": "PASS"
+        }
+      ]
+    }
+  ],
+  "error": null,
+  "scenario": {
+    "id": "lubrication-fault",
+    "description": "Caso lubrication: fault",
+    "program": "correct.st",
+    "duration_ms": 1300,
+    "scan_ms": 100,
+    "initial": {
+      "LevelOK": true
+    },
+    "events": [
+      {
+        "scan": 0,
+        "time_ms": null,
+        "set": {
+          "Start": true
+        }
+      },
+      {
+        "scan": 6,
+        "time_ms": null,
+        "set": {
+          "Pressure": true
+        }
+      },
+      {
+        "scan": 7,
+        "time_ms": null,
+        "set": {
+          "Ack": true
+        }
+      },
+      {
+        "scan": 8,
+        "time_ms": null,
+        "set": {
+          "Start": false
+        }
+      },
+      {
+        "scan": 9,
+        "time_ms": null,
+        "set": {
+          "Start": true,
+          "Ack": false
+        }
+      },
+      {
+        "scan": 11,
+        "time_ms": null,
+        "set": {
+          "LevelOK": false
+        }
+      }
+    ],
+    "requirements": [
+      {
+        "id": "L03",
+        "description": "Timeout de presión enclava falla",
+        "kind": "hold",
+        "expr": "Fault AND NOT Pump",
+        "when": null,
+        "trigger": null,
+        "until": null,
+        "steps": null,
+        "start_ms": 400,
+        "end_ms": 700,
+        "within_ms": null
+      },
+      {
+        "id": "L05",
+        "description": "Recuperar presión no reconoce la falla",
+        "kind": "latch",
+        "expr": "Fault",
+        "when": null,
+        "trigger": "Fault",
+        "until": "Ack AND LevelOK AND Pressure AND NOT Start AND NOT Stop",
+        "steps": null,
+        "start_ms": 0,
+        "end_ms": null,
+        "within_ms": null
+      },
+      {
+        "id": "L06",
+        "description": "Reconocimiento inválido con Start sostenido",
+        "kind": "hold",
+        "expr": "Fault",
+        "when": null,
+        "trigger": null,
+        "until": null,
+        "steps": null,
+        "start_ms": 700,
+        "end_ms": 700,
+        "within_ms": null
+      },
+      {
+        "id": "L07",
+        "description": "Reconocimiento válido no rearranca",
+        "kind": "hold",
+        "expr": "NOT Pump AND NOT Fault",
+        "when": null,
+        "trigger": null,
+        "until": null,
+        "steps": null,
+        "start_ms": 800,
+        "end_ms": 800,
+        "within_ms": null
+      },
+      {
+        "id": "L07-start",
+        "description": "Nueva orden explícita",
+        "kind": "hold",
+        "expr": "Pump",
+        "when": null,
+        "trigger": null,
+        "until": null,
+        "steps": null,
+        "start_ms": 900,
+        "end_ms": 1000,
+        "within_ms": null
+      },
+      {
+        "id": "L04-level",
+        "description": "Sin nivel no hay salida",
+        "kind": "never",
+        "expr": "Pump",
+        "when": "NOT LevelOK",
+        "trigger": null,
+        "until": null,
+        "steps": null,
+        "start_ms": 0,
+        "end_ms": null,
+        "within_ms": null
+      }
+    ]
+  }
+}

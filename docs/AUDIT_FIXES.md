@@ -36,7 +36,8 @@ los diagnósticos intermedios de formato/tipos fueron corregidos antes del cierr
 ## Pendientes precisos
 
 - XML desde navegador: se pulsó descarga, sin error de consola, pero no se encontró
-  archivo resultante. No se atribuye a una causa no demostrada. XML sí pasó generación,
+  archivo resultante. Una comprobación adicional del evento de descarga agotó su
+  espera de 12 segundos sin recibirlo. No se atribuye a una causa no demostrada. XML sí pasó generación,
   análisis XML y comparación por HTTP/CLI. Queda verificar el destino/flujo de descarga de Edge.
 - No se envió solicitud a IA real ni se verificó calidad de un modelo real.
 - Sin MatIEC, PLC comercial, validación móvil o lector de pantalla nuevos.

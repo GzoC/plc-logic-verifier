@@ -16,8 +16,10 @@ Edge: PASS/FAIL, descarte OLD→NEW, borrador de 42.856 bytes reducido a 2.476 y
 JSON/CSV/HTML descargados y comparados; XML por navegador pendiente (sin archivo observado).
 XML por HTTP/CLI sí verificado. Ningún envío real de IA ni comparación externa nueva.
 
-Última cuota observada: 14% restante de ventana 300 min; 2% semanal. Guardado preventivo
-local; nunca confundir porcentajes con tiempo. No existe monitor fuera del trabajo activo.
+Lectura anterior: 14% restante de ventana 300 min; 2% semanal. Lectura posterior al
+checkpoint: 90% restante de ventana 300 min y 98% semanal (usedPercent 10 y 2).
+Guardado preventivo local; nunca confundir porcentajes con tiempo. No existe monitor
+fuera del trabajo activo.
 Próximo paso puntual: verificar descarga XML de Edge. No repetir toda la auditoría salvo
 cambios nuevos. No hacer push sin nueva autorización. Servidor de prueba puerto 8766.
 

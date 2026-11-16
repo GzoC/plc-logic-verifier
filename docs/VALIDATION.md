@@ -1,3 +1,8 @@
+# Evidencia histórica (2026-11-14/15)
+
+Los resultados siguientes pertenecen a la versión anterior. Para las correcciones y
+pruebas nuevas de 2026-11-16, ver [AUDIT_FIXES.md](AUDIT_FIXES.md).
+
 # Validación y evidencia
 
 Última comprobación: 2026-11-15. Entorno local observado: Windows, Python 3.12.13, uv 0.11.19.

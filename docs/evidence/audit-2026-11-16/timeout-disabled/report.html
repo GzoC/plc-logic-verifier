@@ -1,0 +1,2953 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>PLC Logic Verifier · FAIL</title><style>
+body{font:16px system-ui;margin:40px auto;max-width:1100px;padding:0 24px;color:#172b35;background:#f5f6f3}
+h1{font-size:32px}article,details{background:white;padding:20px;margin:16px 0;border:1px solid #d2dbd6;border-radius:8px}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;font:13px ui-monospace,monospace}.notice{border-left:5px solid #d26b26;padding:16px;background:#fff1dc}
+</style><h1>PLC Logic Verifier</h1><h2>Resultado: FAIL</h2>
+<p class="notice">Verificación por simulación con alcance definido. No certifica seguridad funcional ni compatibilidad universal con PLC</p><p>Escenarios observados, no prueba formal exhaustiva. No sustituye FAT, SAT ni revisión de ingeniería.</p>
+<p>Motor 0.1.0 · esquema 1</p>
+<pre>Programa SHA-256: 9fde769a7c77696844faa199371858412630947763161d9cf96e97508f918be9
+Escenario SHA-256: c970d2822da6293cc1cdf0e0fe9daeedb497cae8a44a9727bc2bc61d8648c848
+Reproducir: plc-verifier run examples/lubrication/fault.yaml --program examples/lubrication/defects/timeout_disabled.st</pre>
+<h2>Alcance y semántica</h2><pre>{
+  &quot;version&quot;: &quot;0.1.0&quot;,
+  &quot;scan&quot;: &quot;inputs -&gt; sequential execution -&gt; outputs/assertions -&gt; clock advance&quot;,
+  &quot;duration&quot;: &quot;[0,duration_ms)&quot;,
+  &quot;INT&quot;: &quot;signed 16 bit; overflow ERROR; division toward zero&quot;,
+  &quot;TIME&quot;: &quot;0..2147483647 integer ms&quot;,
+  &quot;TON&quot;: &quot;first true call ET=0; ET=min(now-start,PT); Q=ET&gt;=PT; false resets; skipped holds; PT changes keep start&quot;,
+  &quot;R_TRIG&quot;: &quot;initial memory FALSE; Q cleared each scan; memory updated only on call&quot;,
+  &quot;multiple_calls&quot;: &quot;ERROR&quot;,
+  &quot;retention&quot;: &quot;between scans only; new run resets&quot;
+}</pre>
+<details><summary>Configuración del escenario</summary><pre>{
+  &quot;id&quot;: &quot;lubrication-fault&quot;,
+  &quot;description&quot;: &quot;Caso lubrication: fault&quot;,
+  &quot;program&quot;: &quot;correct.st&quot;,
+  &quot;duration_ms&quot;: 1300,
+  &quot;scan_ms&quot;: 100,
+  &quot;initial&quot;: {
+    &quot;LevelOK&quot;: true
+  },
+  &quot;events&quot;: [
+    {
+      &quot;scan&quot;: 0,
+      &quot;time_ms&quot;: null,
+      &quot;set&quot;: {
+        &quot;Start&quot;: true
+      }
+    },
+    {
+      &quot;scan&quot;: 6,
+      &quot;time_ms&quot;: null,
+      &quot;set&quot;: {
+        &quot;Pressure&quot;: true
+      }
+    },
+    {
+      &quot;scan&quot;: 7,
+      &quot;time_ms&quot;: null,
+      &quot;set&quot;: {
+        &quot;Ack&quot;: true
+      }
+    },
+    {
+      &quot;scan&quot;: 8,
+      &quot;time_ms&quot;: null,
+      &quot;set&quot;: {
+        &quot;Start&quot;: false
+      }
+    },
+    {
+      &quot;scan&quot;: 9,
+      &quot;time_ms&quot;: null,
+      &quot;set&quot;: {
+        &quot;Start&quot;: true,
+        &quot;Ack&quot;: false
+      }
+    },
+    {
+      &quot;scan&quot;: 11,
+      &quot;time_ms&quot;: null,
+      &quot;set&quot;: {
+        &quot;LevelOK&quot;: false
+      }
+    }
+  ],
+  &quot;requirements&quot;: [
+    {
+      &quot;id&quot;: &quot;L03&quot;,
+      &quot;description&quot;: &quot;Timeout de presión enclava falla&quot;,
+      &quot;kind&quot;: &quot;hold&quot;,
+      &quot;expr&quot;: &quot;Fault AND NOT Pump&quot;,
+      &quot;when&quot;: null,
+      &quot;trigger&quot;: null,
+      &quot;until&quot;: null,
+      &quot;steps&quot;: null,
+      &quot;start_ms&quot;: 300,
+      &quot;end_ms&quot;: 700,
+      &quot;within_ms&quot;: null
+    },
+    {
+      &quot;id&quot;: &quot;L05&quot;,
+      &quot;description&quot;: &quot;Recuperar presión no reconoce la falla&quot;,
+      &quot;kind&quot;: &quot;latch&quot;,
+      &quot;expr&quot;: &quot;Fault&quot;,
+      &quot;when&quot;: null,
+      &quot;trigger&quot;: &quot;Fault&quot;,
+      &quot;until&quot;: &quot;Ack AND LevelOK AND Pressure AND NOT Start AND NOT Stop&quot;,
+      &quot;steps&quot;: null,
+      &quot;start_ms&quot;: 0,
+      &quot;end_ms&quot;: null,
+      &quot;within_ms&quot;: null
+    },
+    {
+      &quot;id&quot;: &quot;L06&quot;,
+      &quot;description&quot;: &quot;Reconocimiento inválido con Start sostenido&quot;,
+      &quot;kind&quot;: &quot;hold&quot;,
+      &quot;expr&quot;: &quot;Fault&quot;,
+      &quot;when&quot;: null,
+      &quot;trigger&quot;: null,
+      &quot;until&quot;: null,
+      &quot;steps&quot;: null,
+      &quot;start_ms&quot;: 700,
+      &quot;end_ms&quot;: 700,
+      &quot;within_ms&quot;: null
+    },
+    {
+      &quot;id&quot;: &quot;L07&quot;,
+      &quot;description&quot;: &quot;Reconocimiento válido no rearranca&quot;,
+      &quot;kind&quot;: &quot;hold&quot;,
+      &quot;expr&quot;: &quot;NOT Pump AND NOT Fault&quot;,
+      &quot;when&quot;: null,
+      &quot;trigger&quot;: null,
+      &quot;until&quot;: null,
+      &quot;steps&quot;: null,
+      &quot;start_ms&quot;: 800,
+      &quot;end_ms&quot;: 800,
+      &quot;within_ms&quot;: null
+    },
+    {
+      &quot;id&quot;: &quot;L07-start&quot;,
+      &quot;description&quot;: &quot;Nueva orden explícita&quot;,
+      &quot;kind&quot;: &quot;hold&quot;,
+      &quot;expr&quot;: &quot;Pump&quot;,
+      &quot;when&quot;: null,
+      &quot;trigger&quot;: null,
+      &quot;until&quot;: null,
+      &quot;steps&quot;: null,
+      &quot;start_ms&quot;: 900,
+      &quot;end_ms&quot;: 1000,
+      &quot;within_ms&quot;: null
+    },
+    {
+      &quot;id&quot;: &quot;L04-level&quot;,
+      &quot;description&quot;: &quot;Sin nivel no hay salida&quot;,
+      &quot;kind&quot;: &quot;never&quot;,
+      &quot;expr&quot;: &quot;Pump&quot;,
+      &quot;when&quot;: &quot;NOT LevelOK&quot;,
+      &quot;trigger&quot;: null,
+      &quot;until&quot;: null,
+      &quot;steps&quot;: null,
+      &quot;start_ms&quot;: 0,
+      &quot;end_ms&quot;: null,
+      &quot;within_ms&quot;: null
+    }
+  ]
+}</pre></details>
+<h2>Requisitos y evidencia</h2><article><h3>L03 · FAIL</h3><p>Timeout de presión enclava falla</p><pre>{
+  &quot;id&quot;: &quot;L03&quot;,
+  &quot;description&quot;: &quot;Timeout de presión enclava falla&quot;,
+  &quot;kind&quot;: &quot;hold&quot;,
+  &quot;status&quot;: &quot;FAIL&quot;,
+  &quot;expected&quot;: {
+    &quot;id&quot;: &quot;L03&quot;,
+    &quot;description&quot;: &quot;Timeout de presión enclava falla&quot;,
+    &quot;kind&quot;: &quot;hold&quot;,
+    &quot;expr&quot;: &quot;Fault AND NOT Pump&quot;,
+    &quot;start_ms&quot;: 300,
+    &quot;end_ms&quot;: 700
+  },
+  &quot;reason&quot;: &quot;Observed requirement violation&quot;,
+  &quot;observations&quot;: 5,
+  &quot;first_failure_scan&quot;: 3,
+  &quot;observed&quot;: {
+    &quot;START&quot;: true,
+    &quot;STOP&quot;: false,
+    &quot;LEVELOK&quot;: true,
+    &quot;PRESSURE&quot;: false,
+    &quot;ACK&quot;: false,
+    &quot;PUMP&quot;: true,
+    &quot;FAULT&quot;: false,
+    &quot;STATE&quot;: 1,
+    &quot;DEADLINE&quot;: 500,
+    &quot;STARTEDGE&quot;: {
+      &quot;CLK&quot;: true,
+      &quot;Q&quot;: false,
+      &quot;memory&quot;: true
+    },
+    &quot;PHASECLOCK&quot;: {
+      &quot;IN&quot;: true,
+      &quot;PT&quot;: 2145600000,
+      &quot;ET&quot;: 300,
+      &quot;Q&quot;: false,
+      &quot;start_ms&quot;: 0
+    },
+    &quot;PRESSURETIMER&quot;: {
+      &quot;IN&quot;: true,
+      &quot;PT&quot;: 300,
+      &quot;ET&quot;: 300,
+      &quot;Q&quot;: true,
+      &quot;start_ms&quot;: 0
+    }
+  },
+  &quot;related_writes&quot;: {
+    &quot;STARTEDGE&quot;: {
+      &quot;line&quot;: 15,
+      &quot;column&quot;: 1,
+      &quot;scan&quot;: 3
+    },
+    &quot;STATE&quot;: {
+      &quot;line&quot;: 21,
+      &quot;column&quot;: 41,
+      &quot;scan&quot;: 0
+    },
+    &quot;DEADLINE&quot;: {
+      &quot;line&quot;: 21,
+      &quot;column&quot;: 53,
+      &quot;scan&quot;: 0
+    },
+    &quot;PHASECLOCK&quot;: {
+      &quot;line&quot;: 24,
+      &quot;column&quot;: 1,
+      &quot;scan&quot;: 3
+    },
+    &quot;PRESSURETIMER&quot;: {
+      &quot;line&quot;: 30,
+      &quot;column&quot;: 1,
+      &quot;scan&quot;: 3
+    },
+    &quot;PUMP&quot;: {
+      &quot;line&quot;: 32,
+      &quot;column&quot;: 1,
+      &quot;scan&quot;: 3
+    }
+  },
+  &quot;evidence_scans&quot;: [
+    1,
+    5
+  ],
+  &quot;notes&quot;: &quot;Last executed writes are evidence, not proof of root cause.&quot;,
+  &quot;release_observed&quot;: null
+}</pre><h4>Ventana de evidencia: scans 1–5</h4><pre>[
+  {
+    &quot;scan&quot;: 1,
+    &quot;time_ms&quot;: 100,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: false,
+      &quot;ACK&quot;: false
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: true,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 1,
+      &quot;DEADLINE&quot;: 500
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 100,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 100,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 1
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 21,
+        &quot;column&quot;: 41,
+        &quot;scan&quot;: 0
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 21,
+        &quot;column&quot;: 53,
+        &quot;scan&quot;: 0
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 1
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 1
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 1
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 2,
+    &quot;time_ms&quot;: 200,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: false,
+      &quot;ACK&quot;: false
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: true,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 1,
+      &quot;DEADLINE&quot;: 500
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 200,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 200,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 2
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 21,
+        &quot;column&quot;: 41,
+        &quot;scan&quot;: 0
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 21,
+        &quot;column&quot;: 53,
+        &quot;scan&quot;: 0
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 2
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 2
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 2
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 3,
+    &quot;time_ms&quot;: 300,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: false,
+      &quot;ACK&quot;: false
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: true,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 1,
+      &quot;DEADLINE&quot;: 500
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 300,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 300,
+        &quot;Q&quot;: true,
+        &quot;start_ms&quot;: 0
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 3
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 21,
+        &quot;column&quot;: 41,
+        &quot;scan&quot;: 0
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 21,
+        &quot;column&quot;: 53,
+        &quot;scan&quot;: 0
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 3
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 3
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 3
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L03&quot;,
+        &quot;status&quot;: &quot;FAIL&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 4,
+    &quot;time_ms&quot;: 400,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: false,
+      &quot;ACK&quot;: false
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: true,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 1,
+      &quot;DEADLINE&quot;: 500
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 400,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 300,
+        &quot;Q&quot;: true,
+        &quot;start_ms&quot;: 0
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 4
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 21,
+        &quot;column&quot;: 41,
+        &quot;scan&quot;: 0
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 21,
+        &quot;column&quot;: 53,
+        &quot;scan&quot;: 0
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 4
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 4
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 4
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L03&quot;,
+        &quot;status&quot;: &quot;FAIL&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 5,
+    &quot;time_ms&quot;: 500,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: false,
+      &quot;ACK&quot;: false
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: false,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 2,
+      &quot;DEADLINE&quot;: 800
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 500,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: false,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 0,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: null
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 5
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 26,
+        &quot;column&quot;: 23,
+        &quot;scan&quot;: 5
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 26,
+        &quot;column&quot;: 35,
+        &quot;scan&quot;: 5
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 5
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 5
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 5
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L03&quot;,
+        &quot;status&quot;: &quot;FAIL&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  }
+]</pre></article><article><h3>L05 · PASS</h3><p>Recuperar presión no reconoce la falla</p><pre>{
+  &quot;id&quot;: &quot;L05&quot;,
+  &quot;description&quot;: &quot;Recuperar presión no reconoce la falla&quot;,
+  &quot;kind&quot;: &quot;latch&quot;,
+  &quot;status&quot;: &quot;PASS&quot;,
+  &quot;expected&quot;: {
+    &quot;id&quot;: &quot;L05&quot;,
+    &quot;description&quot;: &quot;Recuperar presión no reconoce la falla&quot;,
+    &quot;kind&quot;: &quot;latch&quot;,
+    &quot;expr&quot;: &quot;Fault&quot;,
+    &quot;trigger&quot;: &quot;Fault&quot;,
+    &quot;until&quot;: &quot;Ack AND LevelOK AND Pressure AND NOT Start AND NOT Stop&quot;,
+    &quot;start_ms&quot;: 0
+  },
+  &quot;reason&quot;: &quot;Requirement satisfied in observed window&quot;,
+  &quot;observations&quot;: 1,
+  &quot;first_failure_scan&quot;: null,
+  &quot;observed&quot;: null,
+  &quot;related_writes&quot;: {},
+  &quot;evidence_scans&quot;: null,
+  &quot;notes&quot;: &quot;Last executed writes are evidence, not proof of root cause.&quot;,
+  &quot;release_observed&quot;: false
+}</pre></article><article><h3>L06 · FAIL</h3><p>Reconocimiento inválido con Start sostenido</p><pre>{
+  &quot;id&quot;: &quot;L06&quot;,
+  &quot;description&quot;: &quot;Reconocimiento inválido con Start sostenido&quot;,
+  &quot;kind&quot;: &quot;hold&quot;,
+  &quot;status&quot;: &quot;FAIL&quot;,
+  &quot;expected&quot;: {
+    &quot;id&quot;: &quot;L06&quot;,
+    &quot;description&quot;: &quot;Reconocimiento inválido con Start sostenido&quot;,
+    &quot;kind&quot;: &quot;hold&quot;,
+    &quot;expr&quot;: &quot;Fault&quot;,
+    &quot;start_ms&quot;: 700,
+    &quot;end_ms&quot;: 700
+  },
+  &quot;reason&quot;: &quot;Observed requirement violation&quot;,
+  &quot;observations&quot;: 1,
+  &quot;first_failure_scan&quot;: 7,
+  &quot;observed&quot;: {
+    &quot;START&quot;: true,
+    &quot;STOP&quot;: false,
+    &quot;LEVELOK&quot;: true,
+    &quot;PRESSURE&quot;: true,
+    &quot;ACK&quot;: true,
+    &quot;PUMP&quot;: false,
+    &quot;FAULT&quot;: false,
+    &quot;STATE&quot;: 2,
+    &quot;DEADLINE&quot;: 800,
+    &quot;STARTEDGE&quot;: {
+      &quot;CLK&quot;: true,
+      &quot;Q&quot;: false,
+      &quot;memory&quot;: true
+    },
+    &quot;PHASECLOCK&quot;: {
+      &quot;IN&quot;: true,
+      &quot;PT&quot;: 2145600000,
+      &quot;ET&quot;: 700,
+      &quot;Q&quot;: false,
+      &quot;start_ms&quot;: 0
+    },
+    &quot;PRESSURETIMER&quot;: {
+      &quot;IN&quot;: false,
+      &quot;PT&quot;: 300,
+      &quot;ET&quot;: 0,
+      &quot;Q&quot;: false,
+      &quot;start_ms&quot;: null
+    }
+  },
+  &quot;related_writes&quot;: {
+    &quot;STARTEDGE&quot;: {
+      &quot;line&quot;: 15,
+      &quot;column&quot;: 1,
+      &quot;scan&quot;: 7
+    },
+    &quot;STATE&quot;: {
+      &quot;line&quot;: 26,
+      &quot;column&quot;: 23,
+      &quot;scan&quot;: 5
+    },
+    &quot;DEADLINE&quot;: {
+      &quot;line&quot;: 26,
+      &quot;column&quot;: 35,
+      &quot;scan&quot;: 5
+    },
+    &quot;PHASECLOCK&quot;: {
+      &quot;line&quot;: 24,
+      &quot;column&quot;: 1,
+      &quot;scan&quot;: 7
+    },
+    &quot;PRESSURETIMER&quot;: {
+      &quot;line&quot;: 30,
+      &quot;column&quot;: 1,
+      &quot;scan&quot;: 7
+    },
+    &quot;PUMP&quot;: {
+      &quot;line&quot;: 32,
+      &quot;column&quot;: 1,
+      &quot;scan&quot;: 7
+    }
+  },
+  &quot;evidence_scans&quot;: [
+    5,
+    9
+  ],
+  &quot;notes&quot;: &quot;Last executed writes are evidence, not proof of root cause.&quot;,
+  &quot;release_observed&quot;: null
+}</pre><h4>Ventana de evidencia: scans 5–9</h4><pre>[
+  {
+    &quot;scan&quot;: 5,
+    &quot;time_ms&quot;: 500,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: false,
+      &quot;ACK&quot;: false
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: false,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 2,
+      &quot;DEADLINE&quot;: 800
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 500,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: false,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 0,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: null
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 5
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 26,
+        &quot;column&quot;: 23,
+        &quot;scan&quot;: 5
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 26,
+        &quot;column&quot;: 35,
+        &quot;scan&quot;: 5
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 5
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 5
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 5
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L03&quot;,
+        &quot;status&quot;: &quot;FAIL&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 6,
+    &quot;time_ms&quot;: 600,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: true,
+      &quot;ACK&quot;: false
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: false,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 2,
+      &quot;DEADLINE&quot;: 800
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 600,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: false,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 0,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: null
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 6
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 26,
+        &quot;column&quot;: 23,
+        &quot;scan&quot;: 5
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 26,
+        &quot;column&quot;: 35,
+        &quot;scan&quot;: 5
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 6
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 6
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 6
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L03&quot;,
+        &quot;status&quot;: &quot;FAIL&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 7,
+    &quot;time_ms&quot;: 700,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: true,
+      &quot;ACK&quot;: true
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: false,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 2,
+      &quot;DEADLINE&quot;: 800
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 700,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: false,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 0,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: null
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 7
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 26,
+        &quot;column&quot;: 23,
+        &quot;scan&quot;: 5
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 26,
+        &quot;column&quot;: 35,
+        &quot;scan&quot;: 5
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 7
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 7
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 7
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L03&quot;,
+        &quot;status&quot;: &quot;FAIL&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L06&quot;,
+        &quot;status&quot;: &quot;FAIL&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 8,
+    &quot;time_ms&quot;: 800,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: false,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: true,
+      &quot;ACK&quot;: true
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: true,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 1,
+      &quot;DEADLINE&quot;: 1300
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: false,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: false
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 800,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: false,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 0,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: null
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 8
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 27,
+        &quot;column&quot;: 10,
+        &quot;scan&quot;: 8
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 27,
+        &quot;column&quot;: 22,
+        &quot;scan&quot;: 8
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 8
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 8
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 8
+      },
+      &quot;FAULT&quot;: {
+        &quot;line&quot;: 17,
+        &quot;column&quot;: 65,
+        &quot;scan&quot;: 8
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L07&quot;,
+        &quot;status&quot;: &quot;FAIL&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 9,
+    &quot;time_ms&quot;: 900,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: true,
+      &quot;ACK&quot;: false
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: true,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 1,
+      &quot;DEADLINE&quot;: 1300
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: true,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 900,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: false,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 0,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: null
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 9
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 27,
+        &quot;column&quot;: 10,
+        &quot;scan&quot;: 8
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 27,
+        &quot;column&quot;: 22,
+        &quot;scan&quot;: 8
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 9
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 9
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 9
+      },
+      &quot;FAULT&quot;: {
+        &quot;line&quot;: 17,
+        &quot;column&quot;: 65,
+        &quot;scan&quot;: 8
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L07-start&quot;,
+        &quot;status&quot;: &quot;PASS&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  }
+]</pre></article><article><h3>L07 · FAIL</h3><p>Reconocimiento válido no rearranca</p><pre>{
+  &quot;id&quot;: &quot;L07&quot;,
+  &quot;description&quot;: &quot;Reconocimiento válido no rearranca&quot;,
+  &quot;kind&quot;: &quot;hold&quot;,
+  &quot;status&quot;: &quot;FAIL&quot;,
+  &quot;expected&quot;: {
+    &quot;id&quot;: &quot;L07&quot;,
+    &quot;description&quot;: &quot;Reconocimiento válido no rearranca&quot;,
+    &quot;kind&quot;: &quot;hold&quot;,
+    &quot;expr&quot;: &quot;NOT Pump AND NOT Fault&quot;,
+    &quot;start_ms&quot;: 800,
+    &quot;end_ms&quot;: 800
+  },
+  &quot;reason&quot;: &quot;Observed requirement violation&quot;,
+  &quot;observations&quot;: 1,
+  &quot;first_failure_scan&quot;: 8,
+  &quot;observed&quot;: {
+    &quot;START&quot;: false,
+    &quot;STOP&quot;: false,
+    &quot;LEVELOK&quot;: true,
+    &quot;PRESSURE&quot;: true,
+    &quot;ACK&quot;: true,
+    &quot;PUMP&quot;: true,
+    &quot;FAULT&quot;: false,
+    &quot;STATE&quot;: 1,
+    &quot;DEADLINE&quot;: 1300,
+    &quot;STARTEDGE&quot;: {
+      &quot;CLK&quot;: false,
+      &quot;Q&quot;: false,
+      &quot;memory&quot;: false
+    },
+    &quot;PHASECLOCK&quot;: {
+      &quot;IN&quot;: true,
+      &quot;PT&quot;: 2145600000,
+      &quot;ET&quot;: 800,
+      &quot;Q&quot;: false,
+      &quot;start_ms&quot;: 0
+    },
+    &quot;PRESSURETIMER&quot;: {
+      &quot;IN&quot;: false,
+      &quot;PT&quot;: 300,
+      &quot;ET&quot;: 0,
+      &quot;Q&quot;: false,
+      &quot;start_ms&quot;: null
+    }
+  },
+  &quot;related_writes&quot;: {
+    &quot;STARTEDGE&quot;: {
+      &quot;line&quot;: 15,
+      &quot;column&quot;: 1,
+      &quot;scan&quot;: 8
+    },
+    &quot;STATE&quot;: {
+      &quot;line&quot;: 27,
+      &quot;column&quot;: 10,
+      &quot;scan&quot;: 8
+    },
+    &quot;DEADLINE&quot;: {
+      &quot;line&quot;: 27,
+      &quot;column&quot;: 22,
+      &quot;scan&quot;: 8
+    },
+    &quot;PHASECLOCK&quot;: {
+      &quot;line&quot;: 24,
+      &quot;column&quot;: 1,
+      &quot;scan&quot;: 8
+    },
+    &quot;PRESSURETIMER&quot;: {
+      &quot;line&quot;: 30,
+      &quot;column&quot;: 1,
+      &quot;scan&quot;: 8
+    },
+    &quot;PUMP&quot;: {
+      &quot;line&quot;: 32,
+      &quot;column&quot;: 1,
+      &quot;scan&quot;: 8
+    },
+    &quot;FAULT&quot;: {
+      &quot;line&quot;: 17,
+      &quot;column&quot;: 65,
+      &quot;scan&quot;: 8
+    }
+  },
+  &quot;evidence_scans&quot;: [
+    6,
+    10
+  ],
+  &quot;notes&quot;: &quot;Last executed writes are evidence, not proof of root cause.&quot;,
+  &quot;release_observed&quot;: null
+}</pre><h4>Ventana de evidencia: scans 6–10</h4><pre>[
+  {
+    &quot;scan&quot;: 6,
+    &quot;time_ms&quot;: 600,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: true,
+      &quot;ACK&quot;: false
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: false,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 2,
+      &quot;DEADLINE&quot;: 800
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 600,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: false,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 0,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: null
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 6
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 26,
+        &quot;column&quot;: 23,
+        &quot;scan&quot;: 5
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 26,
+        &quot;column&quot;: 35,
+        &quot;scan&quot;: 5
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 6
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 6
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 6
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L03&quot;,
+        &quot;status&quot;: &quot;FAIL&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 7,
+    &quot;time_ms&quot;: 700,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: true,
+      &quot;ACK&quot;: true
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: false,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 2,
+      &quot;DEADLINE&quot;: 800
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 700,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: false,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 0,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: null
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 7
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 26,
+        &quot;column&quot;: 23,
+        &quot;scan&quot;: 5
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 26,
+        &quot;column&quot;: 35,
+        &quot;scan&quot;: 5
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 7
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 7
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 7
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L03&quot;,
+        &quot;status&quot;: &quot;FAIL&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L06&quot;,
+        &quot;status&quot;: &quot;FAIL&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 8,
+    &quot;time_ms&quot;: 800,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: false,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: true,
+      &quot;ACK&quot;: true
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: true,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 1,
+      &quot;DEADLINE&quot;: 1300
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: false,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: false
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 800,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: false,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 0,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: null
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 8
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 27,
+        &quot;column&quot;: 10,
+        &quot;scan&quot;: 8
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 27,
+        &quot;column&quot;: 22,
+        &quot;scan&quot;: 8
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 8
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 8
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 8
+      },
+      &quot;FAULT&quot;: {
+        &quot;line&quot;: 17,
+        &quot;column&quot;: 65,
+        &quot;scan&quot;: 8
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L07&quot;,
+        &quot;status&quot;: &quot;FAIL&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 9,
+    &quot;time_ms&quot;: 900,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: true,
+      &quot;ACK&quot;: false
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: true,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 1,
+      &quot;DEADLINE&quot;: 1300
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: true,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 900,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: false,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 0,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: null
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 9
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 27,
+        &quot;column&quot;: 10,
+        &quot;scan&quot;: 8
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 27,
+        &quot;column&quot;: 22,
+        &quot;scan&quot;: 8
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 9
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 9
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 9
+      },
+      &quot;FAULT&quot;: {
+        &quot;line&quot;: 17,
+        &quot;column&quot;: 65,
+        &quot;scan&quot;: 8
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L07-start&quot;,
+        &quot;status&quot;: &quot;PASS&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 10,
+    &quot;time_ms&quot;: 1000,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: true,
+      &quot;ACK&quot;: false
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: true,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 1,
+      &quot;DEADLINE&quot;: 1300
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 1000,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: false,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 0,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: null
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 10
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 27,
+        &quot;column&quot;: 10,
+        &quot;scan&quot;: 8
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 27,
+        &quot;column&quot;: 22,
+        &quot;scan&quot;: 8
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 10
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 10
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 10
+      },
+      &quot;FAULT&quot;: {
+        &quot;line&quot;: 17,
+        &quot;column&quot;: 65,
+        &quot;scan&quot;: 8
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L07-start&quot;,
+        &quot;status&quot;: &quot;PASS&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  }
+]</pre></article><article><h3>L07-start · PASS</h3><p>Nueva orden explícita</p><pre>{
+  &quot;id&quot;: &quot;L07-start&quot;,
+  &quot;description&quot;: &quot;Nueva orden explícita&quot;,
+  &quot;kind&quot;: &quot;hold&quot;,
+  &quot;status&quot;: &quot;PASS&quot;,
+  &quot;expected&quot;: {
+    &quot;id&quot;: &quot;L07-start&quot;,
+    &quot;description&quot;: &quot;Nueva orden explícita&quot;,
+    &quot;kind&quot;: &quot;hold&quot;,
+    &quot;expr&quot;: &quot;Pump&quot;,
+    &quot;start_ms&quot;: 900,
+    &quot;end_ms&quot;: 1000
+  },
+  &quot;reason&quot;: &quot;Requirement satisfied in observed window&quot;,
+  &quot;observations&quot;: 2,
+  &quot;first_failure_scan&quot;: null,
+  &quot;observed&quot;: null,
+  &quot;related_writes&quot;: {},
+  &quot;evidence_scans&quot;: null,
+  &quot;notes&quot;: &quot;Last executed writes are evidence, not proof of root cause.&quot;,
+  &quot;release_observed&quot;: null
+}</pre></article><article><h3>L04-level · PASS</h3><p>Sin nivel no hay salida</p><pre>{
+  &quot;id&quot;: &quot;L04-level&quot;,
+  &quot;description&quot;: &quot;Sin nivel no hay salida&quot;,
+  &quot;kind&quot;: &quot;never&quot;,
+  &quot;status&quot;: &quot;PASS&quot;,
+  &quot;expected&quot;: {
+    &quot;id&quot;: &quot;L04-level&quot;,
+    &quot;description&quot;: &quot;Sin nivel no hay salida&quot;,
+    &quot;kind&quot;: &quot;never&quot;,
+    &quot;expr&quot;: &quot;Pump&quot;,
+    &quot;when&quot;: &quot;NOT LevelOK&quot;,
+    &quot;start_ms&quot;: 0
+  },
+  &quot;reason&quot;: &quot;Requirement satisfied in observed window&quot;,
+  &quot;observations&quot;: 2,
+  &quot;first_failure_scan&quot;: null,
+  &quot;observed&quot;: null,
+  &quot;related_writes&quot;: {},
+  &quot;evidence_scans&quot;: null,
+  &quot;notes&quot;: &quot;Last executed writes are evidence, not proof of root cause.&quot;,
+  &quot;release_observed&quot;: null
+}</pre></article><pre>null</pre>
+<details><summary>Traza completa (13 scans)</summary><pre>[
+  {
+    &quot;scan&quot;: 0,
+    &quot;time_ms&quot;: 0,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: false,
+      &quot;ACK&quot;: false
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: true,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 1,
+      &quot;DEADLINE&quot;: 500
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: true,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 0,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 0,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 0
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 21,
+        &quot;column&quot;: 41,
+        &quot;scan&quot;: 0
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 21,
+        &quot;column&quot;: 53,
+        &quot;scan&quot;: 0
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 0
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 0
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 1,
+    &quot;time_ms&quot;: 100,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: false,
+      &quot;ACK&quot;: false
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: true,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 1,
+      &quot;DEADLINE&quot;: 500
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 100,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 100,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 1
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 21,
+        &quot;column&quot;: 41,
+        &quot;scan&quot;: 0
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 21,
+        &quot;column&quot;: 53,
+        &quot;scan&quot;: 0
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 1
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 1
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 1
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 2,
+    &quot;time_ms&quot;: 200,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: false,
+      &quot;ACK&quot;: false
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: true,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 1,
+      &quot;DEADLINE&quot;: 500
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 200,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 200,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 2
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 21,
+        &quot;column&quot;: 41,
+        &quot;scan&quot;: 0
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 21,
+        &quot;column&quot;: 53,
+        &quot;scan&quot;: 0
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 2
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 2
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 2
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 3,
+    &quot;time_ms&quot;: 300,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: false,
+      &quot;ACK&quot;: false
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: true,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 1,
+      &quot;DEADLINE&quot;: 500
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 300,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 300,
+        &quot;Q&quot;: true,
+        &quot;start_ms&quot;: 0
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 3
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 21,
+        &quot;column&quot;: 41,
+        &quot;scan&quot;: 0
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 21,
+        &quot;column&quot;: 53,
+        &quot;scan&quot;: 0
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 3
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 3
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 3
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L03&quot;,
+        &quot;status&quot;: &quot;FAIL&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 4,
+    &quot;time_ms&quot;: 400,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: false,
+      &quot;ACK&quot;: false
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: true,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 1,
+      &quot;DEADLINE&quot;: 500
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 400,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 300,
+        &quot;Q&quot;: true,
+        &quot;start_ms&quot;: 0
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 4
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 21,
+        &quot;column&quot;: 41,
+        &quot;scan&quot;: 0
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 21,
+        &quot;column&quot;: 53,
+        &quot;scan&quot;: 0
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 4
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 4
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 4
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L03&quot;,
+        &quot;status&quot;: &quot;FAIL&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 5,
+    &quot;time_ms&quot;: 500,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: false,
+      &quot;ACK&quot;: false
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: false,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 2,
+      &quot;DEADLINE&quot;: 800
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 500,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: false,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 0,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: null
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 5
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 26,
+        &quot;column&quot;: 23,
+        &quot;scan&quot;: 5
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 26,
+        &quot;column&quot;: 35,
+        &quot;scan&quot;: 5
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 5
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 5
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 5
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L03&quot;,
+        &quot;status&quot;: &quot;FAIL&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 6,
+    &quot;time_ms&quot;: 600,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: true,
+      &quot;ACK&quot;: false
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: false,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 2,
+      &quot;DEADLINE&quot;: 800
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 600,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: false,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 0,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: null
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 6
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 26,
+        &quot;column&quot;: 23,
+        &quot;scan&quot;: 5
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 26,
+        &quot;column&quot;: 35,
+        &quot;scan&quot;: 5
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 6
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 6
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 6
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L03&quot;,
+        &quot;status&quot;: &quot;FAIL&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 7,
+    &quot;time_ms&quot;: 700,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: true,
+      &quot;ACK&quot;: true
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: false,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 2,
+      &quot;DEADLINE&quot;: 800
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 700,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: false,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 0,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: null
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 7
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 26,
+        &quot;column&quot;: 23,
+        &quot;scan&quot;: 5
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 26,
+        &quot;column&quot;: 35,
+        &quot;scan&quot;: 5
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 7
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 7
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 7
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L03&quot;,
+        &quot;status&quot;: &quot;FAIL&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L06&quot;,
+        &quot;status&quot;: &quot;FAIL&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 8,
+    &quot;time_ms&quot;: 800,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: false,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: true,
+      &quot;ACK&quot;: true
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: true,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 1,
+      &quot;DEADLINE&quot;: 1300
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: false,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: false
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 800,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: false,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 0,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: null
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 8
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 27,
+        &quot;column&quot;: 10,
+        &quot;scan&quot;: 8
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 27,
+        &quot;column&quot;: 22,
+        &quot;scan&quot;: 8
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 8
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 8
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 8
+      },
+      &quot;FAULT&quot;: {
+        &quot;line&quot;: 17,
+        &quot;column&quot;: 65,
+        &quot;scan&quot;: 8
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L07&quot;,
+        &quot;status&quot;: &quot;FAIL&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 9,
+    &quot;time_ms&quot;: 900,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: true,
+      &quot;ACK&quot;: false
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: true,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 1,
+      &quot;DEADLINE&quot;: 1300
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: true,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 900,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: false,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 0,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: null
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 9
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 27,
+        &quot;column&quot;: 10,
+        &quot;scan&quot;: 8
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 27,
+        &quot;column&quot;: 22,
+        &quot;scan&quot;: 8
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 9
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 9
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 9
+      },
+      &quot;FAULT&quot;: {
+        &quot;line&quot;: 17,
+        &quot;column&quot;: 65,
+        &quot;scan&quot;: 8
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L07-start&quot;,
+        &quot;status&quot;: &quot;PASS&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 10,
+    &quot;time_ms&quot;: 1000,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: true,
+      &quot;PRESSURE&quot;: true,
+      &quot;ACK&quot;: false
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: true,
+      &quot;FAULT&quot;: false
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 1,
+      &quot;DEADLINE&quot;: 1300
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: true,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 1000,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: 0
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: false,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 0,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: null
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 10
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 27,
+        &quot;column&quot;: 10,
+        &quot;scan&quot;: 8
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 27,
+        &quot;column&quot;: 22,
+        &quot;scan&quot;: 8
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 10
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 10
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 10
+      },
+      &quot;FAULT&quot;: {
+        &quot;line&quot;: 17,
+        &quot;column&quot;: 65,
+        &quot;scan&quot;: 8
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L07-start&quot;,
+        &quot;status&quot;: &quot;PASS&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;NOT_EVALUATED&quot;,
+        &quot;reason&quot;: &quot;when false&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 11,
+    &quot;time_ms&quot;: 1100,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: false,
+      &quot;PRESSURE&quot;: true,
+      &quot;ACK&quot;: false
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: false,
+      &quot;FAULT&quot;: true
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 0,
+      &quot;DEADLINE&quot;: 1300
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: false,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 0,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: null
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: false,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 0,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: null
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 11
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 19,
+        &quot;column&quot;: 5,
+        &quot;scan&quot;: 11
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 27,
+        &quot;column&quot;: 22,
+        &quot;scan&quot;: 8
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 11
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 11
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 11
+      },
+      &quot;FAULT&quot;: {
+        &quot;line&quot;: 16,
+        &quot;column&quot;: 38,
+        &quot;scan&quot;: 11
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;PASS&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;PASS&quot;
+      }
+    ]
+  },
+  {
+    &quot;scan&quot;: 12,
+    &quot;time_ms&quot;: 1200,
+    &quot;inputs&quot;: {
+      &quot;START&quot;: true,
+      &quot;STOP&quot;: false,
+      &quot;LEVELOK&quot;: false,
+      &quot;PRESSURE&quot;: true,
+      &quot;ACK&quot;: false
+    },
+    &quot;outputs&quot;: {
+      &quot;PUMP&quot;: false,
+      &quot;FAULT&quot;: true
+    },
+    &quot;variables&quot;: {
+      &quot;STATE&quot;: 0,
+      &quot;DEADLINE&quot;: 1300
+    },
+    &quot;blocks&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;CLK&quot;: true,
+        &quot;Q&quot;: false,
+        &quot;memory&quot;: true
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;IN&quot;: false,
+        &quot;PT&quot;: 2145600000,
+        &quot;ET&quot;: 0,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: null
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;IN&quot;: false,
+        &quot;PT&quot;: 300,
+        &quot;ET&quot;: 0,
+        &quot;Q&quot;: false,
+        &quot;start_ms&quot;: null
+      }
+    },
+    &quot;writes&quot;: {
+      &quot;STARTEDGE&quot;: {
+        &quot;line&quot;: 15,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 12
+      },
+      &quot;STATE&quot;: {
+        &quot;line&quot;: 19,
+        &quot;column&quot;: 5,
+        &quot;scan&quot;: 12
+      },
+      &quot;DEADLINE&quot;: {
+        &quot;line&quot;: 27,
+        &quot;column&quot;: 22,
+        &quot;scan&quot;: 8
+      },
+      &quot;PHASECLOCK&quot;: {
+        &quot;line&quot;: 24,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 12
+      },
+      &quot;PRESSURETIMER&quot;: {
+        &quot;line&quot;: 30,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 12
+      },
+      &quot;PUMP&quot;: {
+        &quot;line&quot;: 32,
+        &quot;column&quot;: 1,
+        &quot;scan&quot;: 12
+      },
+      &quot;FAULT&quot;: {
+        &quot;line&quot;: 16,
+        &quot;column&quot;: 38,
+        &quot;scan&quot;: 11
+      }
+    },
+    &quot;assertions&quot;: [
+      {
+        &quot;id&quot;: &quot;L05&quot;,
+        &quot;status&quot;: &quot;PASS&quot;
+      },
+      {
+        &quot;id&quot;: &quot;L04-level&quot;,
+        &quot;status&quot;: &quot;PASS&quot;
+      }
+    ]
+  }
+]</pre></details>
+<p>Las ubicaciones son últimas escrituras ejecutadas; una causa raíz requiere revisión. No hay conclusiones de IA en este informe determinista.</p></html>

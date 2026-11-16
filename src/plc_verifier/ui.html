@@ -12,22 +12,76 @@
 <section id="result"><div class="panel"><div class="resulthead"><h2>03 · Resultado determinista</h2><strong id="verdict" class="badge"></strong></div><p id="meta" class="muted"></p><div class="scroll"><table><thead><tr><th>Requisito</th><th>Descripción</th><th>Estado</th><th>Primera evidencia</th></tr></thead><tbody id="requirements"></tbody></table></div><pre id="runerror" hidden></pre>
 <div class="actions"><button data-format="json">Descargar JSON</button><button data-format="csv">Descargar CSV</button><button data-format="html">Descargar informe HTML</button><button data-format="xml">Descargar JUnit XML</button></div><details><summary>Identidad y alcance de ejecución</summary><pre id="identity"></pre></details></div>
 <div class="panel"><div class="panelhead"><h2>04 · Inspector de traza</h2><div><label for="scan">Scan seleccionado</label><input id="scan" type="number" min="0" value="0"></div></div><p class="muted">La tabla muestra dos scans antes y después. Temporizadores y flancos corresponden al scan seleccionado.</p><div class="tracegrid"><div class="scroll"><table><thead><tr><th>Scan / ms</th><th>Entradas</th><th>Salidas</th></tr></thead><tbody id="trace"></tbody></table></div><div><h3>Temporizadores y flancos</h3><pre id="blocks"></pre></div></div><details><summary>Variables, aserciones y últimas escrituras</summary><pre id="details"></pre></details></div>
-<div class="panel ai"><h2>05 · Asistente opcional</h2><p class="muted">Sus sugerencias no alteran el veredicto ni aplican cambios. El envío a OpenAI sólo ocurre al pulsar «Enviar este JSON». Requiere OPENAI_API_KEY y OPENAI_MODEL en el servidor. Puedes editar el JSON para excluir cualquier fragmento.</p><label><input type="checkbox" id="includeSource"> Incluir programa sin comentarios</label><button id="preview">Preparar vista previa local</button><label for="payload" style="margin-top:15px">Contenido exacto que se enviará (editable, máximo 24 KB)</label><textarea id="payload" spellcheck="false" placeholder="Todavía no se ha preparado información para enviar."></textarea><div class="actions"><button id="send" disabled>Enviar este JSON a OpenAI</button></div><pre id="advice" aria-live="polite">No se ha solicitado ninguna explicación.</pre></div></section>
+<div class="panel ai"><h2>05 · Asistente opcional</h2><p class="muted">Sus sugerencias no alteran el veredicto ni aplican cambios. El envío a OpenAI sólo ocurre al pulsar «Enviar este JSON». Requiere OPENAI_API_KEY y OPENAI_MODEL en el servidor. Puedes editar el JSON para excluir cualquier fragmento.</p><label><input type="checkbox" id="includeSource"> Incluir programa sin comentarios</label><label for="reqSelect">Requisitos (IDs separados por coma; vacío = todos; - = ninguno)</label><input id="reqSelect"><label for="scanSelect">Scans (índices separados por coma; vacío = evidencia; - = ninguno)</label><input id="scanSelect"><label for="sourceLines">Fragmento ST (líneas inicio:fin; vacío = completo)</label><input id="sourceLines"><label><input type="checkbox" id="suggestScenarios"> Solicitar escenarios: incluir esquema y variables tipadas</label><button id="preview">Preparar vista previa local</button><label for="payload" style="margin-top:15px">Contenido exacto que se enviará (editable, máximo 24 KB)</label><textarea id="payload" spellcheck="false" placeholder="Todavía no se ha preparado información para enviar."></textarea><p id="payloadSize" role="status">Sin borrador local.</p><div class="actions"><button id="authorize" disabled>Autorizar este borrador</button><button id="send" disabled>Enviar este JSON a OpenAI</button></div><pre id="advice" aria-live="polite">No se ha solicitado ninguna explicación.</pre></div></section>
 <p class="foot">Tiempo virtual · Sin conexión a PLC físicos · Escenarios observados, no prueba formal exhaustiva · No sustituye FAT, SAT ni revisión de ingeniería.</p></main>
 <script>
-const token='__TOKEN__', $=id=>document.getElementById(id);let result=null,catalog=[];
-async function api(path,data){const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json','X-PLC-Token':token},body:JSON.stringify(data)});const value=await r.json();if(!r.ok)throw Error(value.error||r.statusText);return value;}
+const token='__TOKEN__', $=id=>document.getElementById(id);
+let result=null, executed=null, catalog=[], revision=0, runSerial=0, aiRevision=0, authorized=null;
+async function api(path,data,raw=false){
+  const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json','X-PLC-Token':token},body:JSON.stringify(data)});
+  if(!r.ok){const value=await r.json();throw Error(value.error||r.statusText);}
+  return raw?r.text():r.json();
+}
 function status(message,error=false){$('status').textContent=message;$('status').className=error?'error':'';}
-function reset(){result=null;$('result').style.display='none';$('payload').value='';$('send').disabled=true;$('advice').textContent='No se ha solicitado ninguna explicación.';}
-function loadExample(){const ex=catalog[Number($('examples').value)];if(!ex)return;$('source').value=ex.source;$('scenario').value=ex.scenario;reset();status('Ejemplo cargado. Ejecuta para obtener un resultado.');}
+function resetAI(){aiRevision++;authorized=null;$('payload').value='';$('payloadSize').textContent='Sin borrador local.';$('authorize').disabled=true;$('send').disabled=true;$('advice').textContent='No se ha solicitado ninguna explicación.';}
+function reset(){revision++;result=null;executed=null;$('result').style.display='none';$('run').disabled=false;resetAI();status('Entradas modificadas: todavía no ejecutadas.');}
+function loadExample(){const ex=catalog[Number($('examples').value)];if(!ex)return;reset();$('source').value=ex.source;$('scenario').value=ex.scenario;status('Ejemplo cargado. Ejecuta para obtener un resultado.');}
+function current(snapshot){return snapshot.revision===revision&&snapshot.id===runSerial&&snapshot.source===$('source').value&&snapshot.scenario===$('scenario').value;}
+async function digest(text){const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));return Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');}
 function td(row,text){const cell=document.createElement('td');cell.textContent=text;row.append(cell);return cell;}
 function trace(){if(!result)return;const n=Math.max(0,Math.min(result.trace.length-1,Number($('scan').value)||0));$('scan').value=n;$('trace').replaceChildren();for(const row of result.trace.slice(Math.max(0,n-2),n+3)){const tr=document.createElement('tr');td(tr,`${row.scan} / ${row.time_ms}`);td(tr,JSON.stringify(row.inputs));td(tr,JSON.stringify(row.outputs));if(row.scan===n)tr.style.background='#e6f3ec';$('trace').append(tr);}const row=result.trace[n];$('blocks').textContent=JSON.stringify(row?.blocks||{},null,2);$('details').textContent=JSON.stringify(row?{variables:row.variables,assertions:row.assertions,writes:row.writes}:{},null,2);}
-function render(){ $('result').style.display='block';$('verdict').textContent=result.status;$('verdict').className='badge '+result.status;$('meta').textContent=`${result.scenario?.id||'Configuración inválida'} · ${result.trace.length} scans registrados · ${result.requirements.length} requisitos`;$('requirements').replaceChildren();for(const r of result.requirements){const tr=document.createElement('tr');td(tr,r.id);td(tr,r.description||r.reason);td(tr,r.status);const cell=td(tr,'');if(r.first_failure_scan!=null){const b=document.createElement('button');b.textContent=`Ver scan ${r.first_failure_scan}`;b.onclick=()=>{$('scan').value=r.first_failure_scan;trace();$('scan').scrollIntoView({block:'center',behavior:'smooth'});};cell.append(b);}else cell.textContent=r.reason||'—';$('requirements').append(tr);}$('runerror').hidden=!result.error;$('runerror').textContent=JSON.stringify(result.error,null,2);$('identity').textContent=JSON.stringify({engine:result.engine_version,program_sha256:result.program_sha256,scenario_sha256:result.scenario_sha256,semantics:result.semantics},null,2);$('scan').max=Math.max(0,result.trace.length-1);$('scan').value=result.requirements.find(r=>r.first_failure_scan!=null)?.first_failure_scan||0;trace(); }
-$('load').onclick=loadExample;$('scan').oninput=trace;$('source').oninput=reset;$('scenario').oninput=reset;
-$('run').onclick=async()=>{reset();$('run').disabled=true;status('Ejecutando motor aislado… límite de 15 segundos.');try{result=await api('/run',{source:$('source').value,scenario:$('scenario').value});render();status(`Verificación terminada: ${result.status}.`);}catch(e){status(e.message,true);}finally{$('run').disabled=false;}};
-for(const [input,target] of [['stfile','source'],['yamlfile','scenario']])$(input).onchange=async()=>{const f=$(input).files[0];if(!f)return;if(f.size>65536){status('Archivo demasiado grande: máximo 64 KiB.',true);return;}$(target).value=await f.text();reset();status('Archivo cargado. Ejecuta para verificarlo.');};
-for(const b of document.querySelectorAll('[data-format]'))b.onclick=async()=>{try{const format=b.dataset.format,data=await api('/export',{result,format});const url=URL.createObjectURL(new Blob([data.content],{type:'application/octet-stream'}));const a=document.createElement('a');a.href=url;a.download={json:'result.json',csv:'trace.csv',html:'report.html',xml:'junit.xml'}[format];a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);}catch(e){status(e.message,true);}};
-$('preview').onclick=async()=>{try{const payload=await api('/ai/preview',{result,source:$('includeSource').checked?$('source').value:null});$('payload').value=JSON.stringify(payload,null,2);$('send').disabled=false;status('Vista previa preparada localmente. No se ha enviado información.');}catch(e){status(e.message,true);}};
-$('send').onclick=async()=>{$('send').disabled=true;try{$('advice').textContent='Solicitando explicación…';const data=await api('/ai/send',{payload:JSON.parse($('payload').value),send:true});$('advice').textContent=JSON.stringify(data,null,2);}catch(e){$('advice').textContent=e.message;}finally{$('send').disabled=false;}};
-fetch('/examples').then(r=>r.json()).then(data=>{catalog=data;for(let i=0;i<data.length;i++){const op=document.createElement('option');op.value=i;op.textContent=data[i].name;$('examples').append(op);}loadExample();}).catch(e=>status(e.message,true));
+function render(){
+  $('result').style.display='block';$('verdict').textContent=result.status;$('verdict').className='badge '+result.status;
+  $('meta').textContent=`Revisión ${executed.revision} · ${result.scenario?.id||'Configuración inválida'} · ${result.trace.length} scans · ${result.requirements.length} requisitos`;
+  $('requirements').replaceChildren();
+  for(const r of result.requirements){const tr=document.createElement('tr');td(tr,r.id);td(tr,r.description||r.reason);td(tr,r.status);const cell=td(tr,'');if(r.first_failure_scan!=null){const b=document.createElement('button');b.textContent=`Ver scan ${r.first_failure_scan}`;b.onclick=()=>{$('scan').value=r.first_failure_scan;trace();$('scan').scrollIntoView({block:'center',behavior:'smooth'});};cell.append(b);}else cell.textContent=r.reason||'—';$('requirements').append(tr);}
+  $('runerror').hidden=!result.error;$('runerror').textContent=JSON.stringify(result.error,null,2);
+  $('identity').textContent=JSON.stringify({revision:executed.revision,engine:result.engine_version,program_sha256:result.program_sha256,scenario_sha256:result.scenario_sha256,executed_program:executed.source,executed_scenario:executed.scenario,semantics:result.semantics},null,2);
+  $('scan').max=Math.max(0,result.trace.length-1);$('scan').value=result.requirements.find(r=>r.first_failure_scan!=null)?.first_failure_scan||0;trace();
+}
+$('load').onclick=loadExample;$('examples').onchange=reset;$('scan').oninput=trace;$('source').oninput=reset;$('scenario').oninput=reset;
+$('run').onclick=async()=>{
+  reset();const snapshot=Object.freeze({id:++runSerial,revision,source:$('source').value,scenario:$('scenario').value});
+  $('run').disabled=true;status('Ejecutando instantánea de entradas… límite de 15 segundos.');
+  try{const response=await api('/run',{source:snapshot.source,scenario:snapshot.scenario});
+    if(!current(snapshot))return;
+    const [programHash,scenarioHash]=await Promise.all([digest(snapshot.source),digest(snapshot.scenario)]);
+    if(!current(snapshot))return;
+    if(response.program_sha256!==programHash||response.scenario_sha256!==scenarioHash)throw Error('La respuesta no coincide con los hashes de las entradas ejecutadas.');
+    executed=snapshot;result=response;render();status(`Verificación terminada: ${result.status}.`);
+  }catch(e){if(current(snapshot))status(e.message,true);}finally{if(current(snapshot))$('run').disabled=false;}
+};
+for(const [input,target] of [['stfile','source'],['yamlfile','scenario']])$(input).onchange=async()=>{
+  reset();const loadingRevision=revision,f=$(input).files[0];if(!f)return;
+  if(f.size>65536){status('Archivo demasiado grande: máximo 64 KiB.',true);return;}
+  try{const text=await f.text();if(revision!==loadingRevision)return;$(target).value=text;reset();status('Archivo cargado. Ejecuta para verificarlo.');}catch(e){if(revision===loadingRevision)status(e.message,true);}
+};
+for(const b of document.querySelectorAll('[data-format]'))b.onclick=async()=>{
+  if(!executed)return;const snapshot=executed, saved=result;
+  try{const format=b.dataset.format,content=await api('/export',{result:saved,format},true);if(!current(snapshot))return;
+    const url=URL.createObjectURL(new Blob([content],{type:'application/octet-stream'}));const a=document.createElement('a');a.href=url;a.download={json:'result.json',csv:'trace.csv',html:'report.html',xml:'junit.xml'}[format];a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);
+  }catch(e){if(current(snapshot))status(e.message,true);}
+};
+function listSelection(text,numeric=false){if(!text.trim())return null;if(text.trim()==='-')return [];return text.split(',').map(x=>numeric?Number(x.trim()):x.trim());}
+function selection(){return {requirement_ids:listSelection($('reqSelect').value),scan_indices:listSelection($('scanSelect').value,true),source_lines:$('sourceLines').value?$('sourceLines').value.split(':').map(Number):null,suggest_scenarios:$('suggestScenarios').checked,include_program:$('includeSource').checked};}
+function payloadChanged(){aiRevision++;authorized=null;$('send').disabled=true;$('advice').textContent='Borrador modificado; requiere nueva autorización.';measureDraft();}
+function measureDraft(){try{const text=JSON.stringify(JSON.parse($('payload').value)),size=new TextEncoder().encode(text).length;$('payloadSize').textContent=`BORRADOR LOCAL: ${size} / 24000 bytes. ${size>24000?'Excede el envío; selecciona menos información o edita el borrador.':'Sin enviar; requiere autorización explícita.'}`;$('authorize').disabled=size>24000||!executed;}catch{$('payloadSize').textContent='Borrador JSON inválido.';$('authorize').disabled=true;}}
+for(const id of ['reqSelect','scanSelect','sourceLines','includeSource','suggestScenarios'])$(id).oninput=resetAI;
+$('payload').oninput=payloadChanged;
+$('preview').onclick=async()=>{
+  if(!executed||!current(executed))return;
+  resetAI();const snapshot=executed,ticket=aiRevision,saved=result,chosen=selection();
+  try{const draft=await api('/ai/preview',{result:saved,source:snapshot.source,selection:chosen});if(!current(snapshot)||ticket!==aiRevision)return;
+    $('payload').value=JSON.stringify(draft.payload,null,2);measureDraft();status('Borrador local preparado. No se ha enviado información.');
+  }catch(e){if(current(snapshot)&&ticket===aiRevision)status(e.message,true);}
+};
+$('authorize').onclick=()=>{measureDraft();if($('authorize').disabled||!executed)return;authorized=Object.freeze({text:$('payload').value,revision:aiRevision,snapshot:executed});$('send').disabled=false;$('payloadSize').textContent+=' Autorizado para envío explícito.';};
+$('send').onclick=async()=>{
+  const approval=authorized;if(!approval||!current(approval.snapshot)||approval.revision!==aiRevision||approval.text!==$('payload').value)return;
+  $('send').disabled=true;authorized=null;
+  try{$('advice').textContent='Solicitando explicación…';const data=await api('/ai/send',{payload:JSON.parse(approval.text),source:approval.snapshot.source,send:true});if(current(approval.snapshot)&&approval.revision===aiRevision)$('advice').textContent=JSON.stringify(data,null,2);
+  }catch(e){if(current(approval.snapshot)&&approval.revision===aiRevision)$('advice').textContent=e.message;}
+};
+const initialRevision=revision;
+fetch('/examples').then(r=>r.json()).then(data=>{catalog=data;for(let i=0;i<data.length;i++){const op=document.createElement('option');op.value=i;op.textContent=data[i].name;$('examples').append(op);}if(revision===initialRevision)loadExample();}).catch(e=>status(e.message,true));
 </script></body></html>

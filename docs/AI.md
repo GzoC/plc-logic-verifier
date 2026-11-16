@@ -34,3 +34,22 @@ Fuentes oficiales consultadas 2026-11-14 (documentación web sin versión fija):
 - [SDK Python, timeout y errores](https://developers.openai.com/api/reference/python)
 - [SDK helpers](https://github.com/openai/openai-python/blob/main/helpers.md)
 La dependencia ejecutable está fijada en pyproject.toml y uv.lock.
+
+## Flujo corregido 2026-11-16
+
+`preview_payload` devuelve borrador local incluso sobre 24.000 bytes. La UI muestra
+su tamaño UTF-8 compacto y bloquea la autorización/envío hasta reducirlo. Selecciones
+previas: IDs de requisitos, índices de scans y líneas inclusivas de ST. Vacío = todos
+los requisitos/evidencia; `-` = ninguno. El manifiesto enumera requisitos omitidos y
+scans incluidos; ninguna reducción es automática. Editar invalida la autorización anterior.
+
+CLI: `explain result.json --requirements R0 --scans "" --payload draft.json`.
+`--source-lines 1:20` limita el fragmento de `--include-program`. El borrador puede
+guardarse sobre el límite; `--send` vuelve a verificar los 24.000 bytes sin truncar.
+Para escenarios: `--suggest-scenarios --context-program executed.st` incluye el esquema
+JSON de Scenario y variables/tipos/secciones del programa cuyo hash coincide con el
+resultado. No incluye el código salvo `--include-program`. Al enviar, suministrar
+`--context-program executed.st` para validar localmente referencias, expresiones y
+eventos de las sugerencias. Sintaxis y tipos se reportan por separado; su ejecución
+permanece NOT_EVALUATED. La UI usa siempre su instantánea ejecutada para ambas acciones.
+No se realizó llamada externa; pruebas de proveedor siguen siendo dobles.

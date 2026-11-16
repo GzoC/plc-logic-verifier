@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 from .language import VerificationError, parse_program
+from .limits import RESULT_BYTES
 from .reports import export, validate_result
 from .scenario import load_scenario, prepare, verify
 
@@ -44,6 +45,13 @@ def main(argv=None) -> int:
     p.add_argument("result", type=Path, nargs="?")
     p.add_argument("--include-program", type=Path)
     p.add_argument("--include-comments", action="store_true")
+    p.add_argument(
+        "--context-program", type=Path, help="Executed source for local suggestion type checking"
+    )
+    p.add_argument("--requirements", help="Comma-separated IDs; empty selects none")
+    p.add_argument("--scans", help="Comma-separated scan indices; empty selects none")
+    p.add_argument("--source-lines", help="Inclusive start:end source fragment")
+    p.add_argument("--suggest-scenarios", action="store_true")
     p.add_argument("--payload", type=Path, default=Path("outputs/ai-payload.json"))
     p.add_argument("--send", action="store_true")
     p = sub.add_parser("serve")
@@ -79,27 +87,46 @@ def main(argv=None) -> int:
                 print(result["error"]["message"], file=sys.stderr)
             return EXIT_CODES[result["status"]]
         if args.command == "report":
-            export(
-                validate_result(json.loads(read_text(args.result, 24 * 1024 * 1024))), args.output
-            )
+            export(validate_result(json.loads(read_text(args.result, RESULT_BYTES))), args.output)
             print(args.output / "report.html")
             return 0
         if args.command == "explain":
-            from .ai import explain, preview_payload
+            from .ai import draft_info, explain, preview_payload
 
             if args.send:
-                advice = explain(json.loads(read_text(args.payload, 24000)), send=True)
+                advice = explain(
+                    json.loads(read_text(args.payload, RESULT_BYTES)),
+                    send=True,
+                    source=read_text(args.context_program) if args.context_program else None,
+                )
                 print(json.dumps(advice, ensure_ascii=False, indent=2))
             else:
                 if args.result is None:
                     raise VerificationError(
                         "Provide a result.json to preview, or --payload ... --send"
                     )
-                result = validate_result(json.loads(read_text(args.result, 24 * 1024 * 1024)))
+                result = validate_result(json.loads(read_text(args.result, RESULT_BYTES)))
                 payload = preview_payload(
                     result,
-                    read_text(args.include_program) if args.include_program else None,
+                    read_text(args.include_program or args.context_program)
+                    if (args.include_program or args.context_program)
+                    else None,
                     args.include_comments,
+                    requirement_ids=args.requirements.split(",")
+                    if args.requirements
+                    else []
+                    if args.requirements == ""
+                    else None,
+                    scan_indices=[int(n) for n in args.scans.split(",")]
+                    if args.scans
+                    else []
+                    if args.scans == ""
+                    else None,
+                    source_lines=[int(n) for n in args.source_lines.split(":")]
+                    if args.source_lines
+                    else None,
+                    suggest_scenarios=args.suggest_scenarios,
+                    include_program=bool(args.include_program),
                 )
                 args.payload.parent.mkdir(parents=True, exist_ok=True)
                 args.payload.write_text(
@@ -108,8 +135,12 @@ def main(argv=None) -> int:
                 print(
                     f"Preview only; nothing sent. Review/edit {args.payload}, then explain --payload <file> --send"
                 )
+                info = draft_info(payload)
+                print(
+                    f"LOCAL_DRAFT: {info['size_bytes']} / {info['limit_bytes']} bytes; sendable={info['sendable']}"
+                )
             return 0
-    except (VerificationError, OSError, UnicodeError, ValueError) as exc:
+    except (VerificationError, OSError, UnicodeError, ValueError, RecursionError) as exc:
         print(str(exc), file=sys.stderr)
         return EXIT_CODES[exc.status] if isinstance(exc, VerificationError) else 2
     except KeyboardInterrupt:

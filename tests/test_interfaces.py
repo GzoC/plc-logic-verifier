@@ -100,7 +100,7 @@ def test_http_local_token_run_and_export():
         with urllib.request.urlopen(
             urllib.request.Request(base + "/export", data=export_data, headers=headers)
         ) as response:
-            assert "<!doctype html>" in json.load(response)["content"]
+            assert "<!doctype html>" in response.read().decode()
     finally:
         server.shutdown()
         server.server_close()
@@ -109,7 +109,24 @@ def test_http_local_token_run_and_export():
 
 def test_ai_preview_does_not_send_or_change_result(result):
     before = copy.deepcopy(result)
-    payload = preview_payload(result, "(* private comment *) PROGRAM P // hidden\n END_PROGRAM")
+    source = "(* private comment *) PROGRAM P // hidden\n END_PROGRAM"
+    from plc_verifier.scenario import load_scenario
+
+    scenario = SCENARIO.read_text(encoding="utf-8")
+    simple = verify(
+        source,
+        __import__("yaml").safe_dump(
+            {
+                **load_scenario(scenario).model_dump(),
+                "initial": {},
+                "events": [],
+                "requirements": [
+                    {"id": "R", "description": "Test", "kind": "always", "expr": "TRUE"}
+                ],
+            }
+        ),
+    )
+    payload = preview_payload(simple, source)
     assert "private" not in payload["program"] and "hidden" not in payload["program"]
     assert result == before
     with pytest.raises(VerificationError, match="Explicit send"):

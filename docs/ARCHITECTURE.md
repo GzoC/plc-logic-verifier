@@ -9,8 +9,12 @@ Aplicación Python local sin equipos físicos ni servicios obligatorios.
 `ai`: envío opcional explícito de un payload previsualizado, sin cambiar veredictos.
 
 Se prioriza un único proceso con límites de fuente, profundidad, scans, variables y traza;
-la interfaz ejecutará verificaciones en un subproceso con timeout. No hay almacenamiento
+la interfaz ejecuta verificaciones en un subproceso con timeout. No hay almacenamiento
 remoto, cuentas de usuario, conexiones a PLC ni despliegue.
 
 Decisiones: tiempo entero, INT con signo de 16 bits, subconjunto cerrado, expresiones
 de aserción con el mismo parser tipado, errores explícitos y sin ejecución dinámica.
+
+`result_schema`: modelos estrictos v1 y coherencia semántica del contenedor importado.
+`limits`: presupuestos de bytes distintos para traza, resultado JSON, HTTP e informes.
+La UI conserva instantáneas por revisión y tickets independientes para respuestas IA.

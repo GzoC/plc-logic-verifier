@@ -1,0 +1,25 @@
+{
+  "variables": 30,
+  "scans": 7000,
+  "scan_ms": 100,
+  "status": "PASS",
+  "roundtrip": "identical",
+  "files": {
+    "junit.xml": {
+      "bytes": 170,
+      "sha256": "ebff88eca7cd6411b05215c8b43ccbfb840d579dbe668574b9ab780802b37949"
+    },
+    "report.html": {
+      "bytes": 35061029,
+      "sha256": "cef60115f5ef32c626f826f42fcc0d63e2be779bfd3c42638fcaf496b43724b3"
+    },
+    "result.json": {
+      "bytes": 11867943,
+      "sha256": "f3a88051eb9a2612ab13f5ef16d234de98bbf81ac8006228f3822e5cfa409f08"
+    },
+    "trace.csv": {
+      "bytes": 13287710,
+      "sha256": "088eb8b84104ce2df48880d9d78013592f75a7958e2404e87c5d7a0d1d434146"
+    }
+  }
+}

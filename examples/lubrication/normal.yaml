@@ -24,19 +24,19 @@ requirements:
   description: Arranque permitido
   expr: Pump
   start_ms: 0
-  end_ms: 500
+  end_ms: 400
 - id: L02-pause
   kind: hold
   description: Pausa cíclica
   expr: NOT Pump
-  start_ms: 600
-  end_ms: 900
+  start_ms: 500
+  end_ms: 700
 - id: L02-repeat
   kind: hold
   description: Nueva lubricación
   expr: Pump
-  start_ms: 1000
-  end_ms: 1300
+  start_ms: 800
+  end_ms: 1200
 - id: L04-stop
   kind: response
   description: Stop para en el mismo scan

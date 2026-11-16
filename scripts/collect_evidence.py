@@ -1,5 +1,6 @@
 """Regenerate evidence by executing current sources, with expected mutant outcomes."""
 
+import argparse
 import json
 from pathlib import Path
 
@@ -11,6 +12,9 @@ OUT = ROOT / "docs/evidence"
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output", type=Path, default=OUT)
+    out = parser.parse_args().output
     summary = []
     for case in ("lubrication", "alternating", "conveyor"):
         folder = ROOT / "examples" / case
@@ -65,9 +69,9 @@ def main():
                 }
             )
             if case == "lubrication" and name == "timeout_disabled":
-                export(result, OUT / "timeout-disabled")
-    OUT.mkdir(exist_ok=True, parents=True)
-    (OUT / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+                export(result, out / "timeout-disabled")
+    out.mkdir(exist_ok=True, parents=True)
+    (out / "summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print(f"{len(summary)} executions verified: 6 PASS + 6 expected FAIL")
 
 

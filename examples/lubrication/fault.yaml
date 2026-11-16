@@ -30,7 +30,7 @@ requirements:
   kind: hold
   description: Timeout de presión enclava falla
   expr: Fault AND NOT Pump
-  start_ms: 400
+  start_ms: 300
   end_ms: 700
 - id: L05
   kind: latch

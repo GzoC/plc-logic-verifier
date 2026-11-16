@@ -4,9 +4,9 @@
 Mostrar el alcance y la advertencia; no hay PLC ni conexión física.
 
 0:40–1:30: ejecutar lubricación normal por CLI o UI; mostrar PASS de cinco requisitos,
-scan virtual y estado de LUBE/PAUSETIMER. Explicar primer scan y cuantización.
+scan virtual y estado de PHASECLOCK y DEADLINE. Explicar primer scan y cuantización.
 
-1:30–2:40: elegir timeout_disabled, ejecutar y abrir L03 en scan 4 (400 ms).
+1:30–2:40: elegir timeout_disabled, ejecutar y abrir L03 en scan 3 (300 ms).
 PRESSURETIMER.Q=TRUE pero PUMP=TRUE y FAULT=FALSE. Señalar la instrucción eliminada
 como defecto conocido del fixture; en programas ajenos sería una hipótesis a revisar.
 

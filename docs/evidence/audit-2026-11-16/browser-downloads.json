@@ -1,0 +1,17 @@
+{
+  "confirmed": {
+    "result.json": {
+      "bytes": 16885,
+      "matches_engine_export": true
+    },
+    "trace.csv": {
+      "bytes": 8600,
+      "matches_engine_export": true
+    },
+    "report (1).html": {
+      "bytes": 75259,
+      "matches_engine_export": true
+    }
+  },
+  "xml_browser_download": "NOT_CONFIRMED; click completed, no resulting file found; HTTP and CLI XML verified"
+}

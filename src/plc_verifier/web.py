@@ -8,8 +8,9 @@ import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from .ai import explain, preview_payload
+from .ai import draft_info, explain, preview_payload
 from .language import VerificationError
+from .limits import HTTP_REQUEST_BYTES, compact
 from .reports import csv_report, html_report, json_report, junit_report, validate_result
 from .scenario import NOTICE
 
@@ -87,11 +88,7 @@ def make_server(port=8765, examples: Path | None = None):
             pass  # No program, trace or credentials in HTTP logs.
 
         def respond(self, status, payload, kind="application/json; charset=utf-8"):
-            body = (
-                payload.encode()
-                if isinstance(payload, str)
-                else json.dumps(payload, ensure_ascii=False).encode()
-            )
+            body = payload.encode() if isinstance(payload, str) else compact(payload).encode()
             self.send_response(status)
             self.send_header("Content-Type", kind)
             self.send_header("Content-Length", str(len(body)))
@@ -136,10 +133,12 @@ def make_server(port=8765, examples: Path | None = None):
                 self.connection.settimeout(25)
                 size = int(self.headers.get("Content-Length", "0"))
                 if (
-                    not 0 < size <= 24 * 1024 * 1024
+                    not 0 < size <= HTTP_REQUEST_BYTES
                     or self.headers.get_content_type() != "application/json"
                 ):
-                    raise VerificationError("Expected JSON body, maximum 24 MiB")
+                    raise VerificationError(
+                        f"Expected JSON body, maximum {HTTP_REQUEST_BYTES} bytes"
+                    )
                 data = json.loads(self.rfile.read(size))
                 if not isinstance(data, dict):
                     raise VerificationError("Expected object")
@@ -153,18 +152,33 @@ def make_server(port=8765, examples: Path | None = None):
                         "csv": csv_report,
                         "xml": junit_report,
                     }[data["format"]]
-                    response = {"content": formatter(result)}
+                    self.respond(200, formatter(result), "application/octet-stream")
+                    return
                 elif self.path == "/ai/preview":
-                    response = preview_payload(
-                        validate_result(data["result"]), data.get("source"), False
+                    response = draft_info(
+                        preview_payload(
+                            validate_result(data["result"]),
+                            data.get("source"),
+                            False,
+                            **data.get("selection", {}),
+                        )
                     )
                 elif self.path == "/ai/send":
-                    response = explain(data["payload"], send=data.get("send") is True)
+                    response = explain(
+                        data["payload"], send=data.get("send") is True, source=data.get("source")
+                    )
                 else:
                     self.respond(404, {"error": "Not found"})
                     return
                 self.respond(200, response)
-            except (VerificationError, ValueError, KeyError, TypeError, OSError) as exc:
+            except (
+                VerificationError,
+                ValueError,
+                KeyError,
+                TypeError,
+                OSError,
+                RecursionError,
+            ) as exc:
                 self.respond(400, {"error": str(exc)})
             finally:
                 slots.release()

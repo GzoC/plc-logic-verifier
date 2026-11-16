@@ -1,5 +1,26 @@
 # Estado y punto de reanudación
 
+## Correcciones de auditoría — 2026-11-16
+
+Base `0b5074965cb2de9d6633f25ef618cc5e0f01f995` comprobada; árbol inicialmente limpio.
+Instrucción vigente: NO push, merge, publicación ni despliegue. Checkpoint sólo local.
+Los seis hallazgos están corregidos. Detalle, archivos, comandos, evidencia y límites
+se encuentran en `docs/AUDIT_FIXES.md`. Evidencia nueva separada en
+`docs/evidence/audit-2026-11-16/`; no se reemplazaron pruebas históricas.
+
+Validación nueva: 89 pytest PASS (0 FAIL/0 SKIP; incluyen 10 casos de JS real en Node),
+Ruff/formato/mypy PASS, wheel/sdist construidos, instalación en entorno limpio sin SDK IA.
+12 fixtures esperados, 12 repeticiones idénticas HTTP, 48 exportaciones y 12 reimportaciones.
+Caso grande 30 INT/7000 scans: PASS; JSON compacto 11.867.943 bytes y roundtrip idéntico.
+Edge: PASS/FAIL, descarte OLD→NEW, borrador de 42.856 bytes reducido a 2.476 y edición.
+JSON/CSV/HTML descargados y comparados; XML por navegador pendiente (sin archivo observado).
+XML por HTTP/CLI sí verificado. Ningún envío real de IA ni comparación externa nueva.
+
+Última cuota observada: 14% restante de ventana 300 min; 2% semanal. Guardado preventivo
+local; nunca confundir porcentajes con tiempo. No existe monitor fuera del trabajo activo.
+Próximo paso puntual: verificar descarga XML de Edge. No repetir toda la auditoría salvo
+cambios nuevos. No hacer push sin nueva autorización. Servidor de prueba puerto 8766.
+
 ## Checkpoint de subida — 2026-11-15
 
 Repositorio existente y confirmado **privado**: https://github.com/GzoC/plc-logic-verifier

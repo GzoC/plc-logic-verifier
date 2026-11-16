@@ -11,6 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 from . import __version__
 from .engine import Engine, evaluate
 from .language import Program, VerificationError, parse_expression, parse_program
+from .limits import RESULT_BYTES, TRACE_BYTES, bounded, compact
 
 NOTICE = "Verificación por simulación con alcance definido. No certifica seguridad funcional ni compatibilidad universal con PLC"
 SEMANTICS = {
@@ -349,7 +350,7 @@ def verify(
                 raise VerificationError("Execution timeout or cancellation")
             row = engine.step(events.get(scan, {}))
             size += len(json.dumps(row)) + len(scenario.requirements) * 160
-            if size > 16 * 1024 * 1024:
+            if size > TRACE_BYTES:
                 raise VerificationError("Trace exceeds 16 MiB budget")
             result["trace"].append(row)
         for r in scenario.requirements:
@@ -377,4 +378,5 @@ def verify(
                 }
                 for r in scenario.requirements
             ]
+    bounded(compact(result), RESULT_BYTES, "Result JSON")
     return result

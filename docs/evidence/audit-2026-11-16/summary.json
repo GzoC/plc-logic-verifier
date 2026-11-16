@@ -1,0 +1,110 @@
+[
+  {
+    "case": "lubrication",
+    "scenario": "normal",
+    "variant": "correct",
+    "status": "PASS",
+    "program_sha256": "92bcae0f79fb0896dc13e97608dbdadc051deee3893c382eb7a06e124ab2ff02",
+    "scenario_sha256": "d5c04164cfdc4d77183c23adf22c81d7f87d53a9d2de42e10762111c114f3001"
+  },
+  {
+    "case": "lubrication",
+    "scenario": "fault",
+    "variant": "correct",
+    "status": "PASS",
+    "program_sha256": "92bcae0f79fb0896dc13e97608dbdadc051deee3893c382eb7a06e124ab2ff02",
+    "scenario_sha256": "c970d2822da6293cc1cdf0e0fe9daeedb497cae8a44a9727bc2bc61d8648c848"
+  },
+  {
+    "case": "lubrication",
+    "scenario": "fault",
+    "variant": "timeout_disabled",
+    "status": "FAIL",
+    "detected_by": "L03",
+    "first_failure_scan": 3,
+    "program_sha256": "9fde769a7c77696844faa199371858412630947763161d9cf96e97508f918be9",
+    "scenario_sha256": "c970d2822da6293cc1cdf0e0fe9daeedb497cae8a44a9727bc2bc61d8648c848"
+  },
+  {
+    "case": "lubrication",
+    "scenario": "fault",
+    "variant": "auto_ack",
+    "status": "FAIL",
+    "detected_by": "L05",
+    "first_failure_scan": 6,
+    "program_sha256": "d4fda0144c3849ec4335fba8f54966a6fc329890f5627b5d099fbdf651ae1148",
+    "scenario_sha256": "c970d2822da6293cc1cdf0e0fe9daeedb497cae8a44a9727bc2bc61d8648c848"
+  },
+  {
+    "case": "alternating",
+    "scenario": "normal",
+    "variant": "correct",
+    "status": "PASS",
+    "program_sha256": "720c46eeb515171f9c138b7cf8cfd8a496044707bf75adf8c73ed07541fc9bed",
+    "scenario_sha256": "3f7cb2c3cc546a1ce89c5c4934916e7ca42179d6712c41cb0ab06fd86af4cb7e"
+  },
+  {
+    "case": "alternating",
+    "scenario": "fault",
+    "variant": "correct",
+    "status": "PASS",
+    "program_sha256": "720c46eeb515171f9c138b7cf8cfd8a496044707bf75adf8c73ed07541fc9bed",
+    "scenario_sha256": "cb5420ea9b2fa4fcc50c9c4e6576204bbadb097a75206f337624ecbb1cc23377"
+  },
+  {
+    "case": "alternating",
+    "scenario": "normal",
+    "variant": "overlap",
+    "status": "FAIL",
+    "detected_by": "B02",
+    "first_failure_scan": 5,
+    "program_sha256": "f227ea950c2fd2e4dea46a9f084f601c6fa53f56df4eecc8d3109129054c2e33",
+    "scenario_sha256": "3f7cb2c3cc546a1ce89c5c4934916e7ca42179d6712c41cb0ab06fd86af4cb7e"
+  },
+  {
+    "case": "alternating",
+    "scenario": "normal",
+    "variant": "no_alternation",
+    "status": "FAIL",
+    "detected_by": "B04",
+    "first_failure_scan": 5,
+    "program_sha256": "cee17ef808df485335e4b1b54906217c7b3deb86c93dcf34f422eb76d9f499ed",
+    "scenario_sha256": "3f7cb2c3cc546a1ce89c5c4934916e7ca42179d6712c41cb0ab06fd86af4cb7e"
+  },
+  {
+    "case": "conveyor",
+    "scenario": "normal",
+    "variant": "correct",
+    "status": "PASS",
+    "program_sha256": "219ed8c3db2782a3978f5afe129da65de525af07f6dbb8504664cfdd2158da6c",
+    "scenario_sha256": "ab021ae945563561e935135a905fcc6bcd969857736b1e7ed50979e5c119394b"
+  },
+  {
+    "case": "conveyor",
+    "scenario": "fault",
+    "variant": "correct",
+    "status": "PASS",
+    "program_sha256": "219ed8c3db2782a3978f5afe129da65de525af07f6dbb8504664cfdd2158da6c",
+    "scenario_sha256": "d2f7e5f4d936cc39ff60955cc2191adbde60fa8c18fb461ca01618eaa32702ee"
+  },
+  {
+    "case": "conveyor",
+    "scenario": "normal",
+    "variant": "reverse_start",
+    "status": "FAIL",
+    "detected_by": "C01-delay",
+    "first_failure_scan": 0,
+    "program_sha256": "d4213d1a7b0a22ace2f85bf36a614002b2dedf93f38c21dc1a135b75c309ebce",
+    "scenario_sha256": "ab021ae945563561e935135a905fcc6bcd969857736b1e7ed50979e5c119394b"
+  },
+  {
+    "case": "conveyor",
+    "scenario": "fault",
+    "variant": "auto_restart",
+    "status": "FAIL",
+    "detected_by": "C04",
+    "first_failure_scan": 9,
+    "program_sha256": "03372d773833f442cc7b8b04ce0b858b8ace983c2ef620e1af58dc57e70b462b",
+    "scenario_sha256": "d2f7e5f4d936cc39ff60955cc2191adbde60fa8c18fb461ca01618eaa32702ee"
+  }
+]

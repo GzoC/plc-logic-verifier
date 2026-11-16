@@ -10,7 +10,7 @@ uv run plc-verifier run examples/lubrication/normal.yaml --output outputs/normal
 ```
 
 Resultado real observado: **PASS, 16 scans y 5 requisitos**. El mutante que elimina
-el timeout de presión produce **FAIL en L03, scan 4, 400 ms**:
+el timeout de presión produce **FAIL en L03, scan 3, 300 ms**:
 
 ```powershell
 uv run plc-verifier run examples/lubrication/fault.yaml --program examples/lubrication/defects/timeout_disabled.st --output outputs/defect
@@ -25,7 +25,8 @@ los comportamientos posibles y los ejemplos no implementan funciones de segurida
 
 ## Instalación y uso
 
-Necesitas Git y [uv](https://docs.astral.sh/uv/getting-started/installation/).
+Para la suite necesitas además Node.js 24 (ejecuta el JavaScript real de la interfaz).
+Para usar la aplicación necesitas Git y [uv](https://docs.astral.sh/uv/getting-started/installation/).
 El repositorio es privado: hace falta acceso concedido por su propietario.
 
 ```powershell
@@ -107,3 +108,15 @@ suggestions require explicit data submission and never change deterministic verd
 It does not certify functional safety, implement universal IEC 61131-3 compatibility,
 replace FAT/SAT, or control physical equipment. External runtime and live AI validation
 have not been performed; see the validation record.
+
+## Integridad de resultados (corrección de auditoría)
+
+La interfaz liga cada resultado a una revisión y una instantánea ST/YAML con hashes
+comprobados. Editar o cargar otras entradas invalida resultados y respuestas IA pendientes.
+`report` importa sólo JSON v1 completo y coherente; archivos contradictorios devuelven
+código 2. Validar el formato SHA-256 no autentica un informe. CSV/HTML/XML son exportaciones,
+no formatos de reimportación. Límites y regresiones en [cierre de auditoría](docs/AUDIT_FIXES.md).
+
+IA: primero selecciona requisitos/scans/fragmentos, prepara un borrador, revisa su tamaño,
+reduce o edita y autoriza ese borrador. Enviar sigue siendo una acción separada explícita.
+No se transmite información al preparar ni autorizar localmente.

@@ -1,3 +1,13 @@
+# Estado vigente — 2026-11-17
+
+Estado vigente: `main` y `origin/main` en `ecd478c82ae9bdfe2af2898779daf909af2148a4`; CI Windows y Linux aprobada. Se verificaron los ocho archivos en Edge y ocho scans con IronPLC. Integración real con proveedor: pendiente. Véanse [evidencias, diferencias y comandos del 17 de noviembre](VERIFICATION_2026-11-17.md).
+
+Checkpoint local de esta intervención. Cuota restante observada (300 minutos / semanal): 74% / 54%, 62% / 52%, 51% / 50%. Sin push, merge ni despliegue.
+
+---
+
+**Registro histórico:** las indicaciones de trabajo sólo local, CI pendiente o descarga XML pendiente describen la fecha de la sección siguiente.
+
 # Estado y punto de reanudación
 
 ## Correcciones de auditoría — 2026-11-16

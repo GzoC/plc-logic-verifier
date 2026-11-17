@@ -1,5 +1,6 @@
 """Exercise actual loopback HTTP, repeated runs and all four export representations."""
 
+import argparse
 import json
 import re
 import threading
@@ -16,6 +17,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--output", type=Path, default=ROOT / "docs/evidence/audit-2026-11-16")
+    dest = parser.parse_args().output
     server = make_server(0, ROOT / "examples")
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
@@ -76,7 +80,7 @@ def main():
                 }
             )
         assert len(summary) == 12
-        out = ROOT / "docs/evidence/audit-2026-11-16"
+        out = dest
         out.mkdir(parents=True, exist_ok=True)
         (out / "http.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
         print("HTTP: 12 expected results, 12 identical repeats, 48 exports, 12 JSON reimports PASS")

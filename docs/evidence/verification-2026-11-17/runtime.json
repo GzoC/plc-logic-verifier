@@ -1,0 +1,220 @@
+{
+  "version": "0.254.0",
+  "module_sha256": "80f34fd0403cce95dd0f78f2b151f14bf2862aaa6fde7e60d121f94650d692e6",
+  "wasm_sha256": "4616f6016b57fad47016faf8e83946a26b5699647ba6ddc3f27db22b54a0ea2c",
+  "source_sha256": "5d633b720bbee9340a2c5cb1239e6294acac888eb85fe013f7492b75d33c95f4",
+  "rows": [
+    {
+      "scan": 0,
+      "time_ms": 0,
+      "clock": "T#0ms",
+      "verifier": {
+        "TICK": 1,
+        "AMOUNT": 2,
+        "PHASE": 3,
+        "ENABLE": true,
+        "PULSE": true,
+        "Q0": true,
+        "Q100": false,
+        "Q125": false
+      },
+      "external": {
+        "TICK": 1,
+        "AMOUNT": 2,
+        "PHASE": 3,
+        "ENABLE": true,
+        "PULSE": true,
+        "Q0": false,
+        "Q100": false,
+        "Q125": false
+      },
+      "differences": [
+        "Q0"
+      ]
+    },
+    {
+      "scan": 1,
+      "time_ms": 50,
+      "clock": "T#50ms",
+      "verifier": {
+        "TICK": 2,
+        "AMOUNT": 4,
+        "PHASE": 7,
+        "ENABLE": true,
+        "PULSE": false,
+        "Q0": true,
+        "Q100": false,
+        "Q125": false
+      },
+      "external": {
+        "TICK": 2,
+        "AMOUNT": 4,
+        "PHASE": 7,
+        "ENABLE": true,
+        "PULSE": false,
+        "Q0": true,
+        "Q100": false,
+        "Q125": false
+      },
+      "differences": []
+    },
+    {
+      "scan": 2,
+      "time_ms": 100,
+      "clock": "T#100ms",
+      "verifier": {
+        "TICK": 3,
+        "AMOUNT": 6,
+        "PHASE": 6,
+        "ENABLE": true,
+        "PULSE": false,
+        "Q0": true,
+        "Q100": true,
+        "Q125": false
+      },
+      "external": {
+        "TICK": 3,
+        "AMOUNT": 6,
+        "PHASE": 6,
+        "ENABLE": true,
+        "PULSE": false,
+        "Q0": true,
+        "Q100": true,
+        "Q125": false
+      },
+      "differences": []
+    },
+    {
+      "scan": 3,
+      "time_ms": 150,
+      "clock": "T#150ms",
+      "verifier": {
+        "TICK": 4,
+        "AMOUNT": 8,
+        "PHASE": 8,
+        "ENABLE": true,
+        "PULSE": false,
+        "Q0": true,
+        "Q100": true,
+        "Q125": true
+      },
+      "external": {
+        "TICK": 4,
+        "AMOUNT": 8,
+        "PHASE": 8,
+        "ENABLE": true,
+        "PULSE": false,
+        "Q0": true,
+        "Q100": true,
+        "Q125": true
+      },
+      "differences": []
+    },
+    {
+      "scan": 4,
+      "time_ms": 200,
+      "clock": "T#200ms",
+      "verifier": {
+        "TICK": 5,
+        "AMOUNT": 7,
+        "PHASE": 7,
+        "ENABLE": false,
+        "PULSE": false,
+        "Q0": false,
+        "Q100": false,
+        "Q125": false
+      },
+      "external": {
+        "TICK": 5,
+        "AMOUNT": 7,
+        "PHASE": 7,
+        "ENABLE": false,
+        "PULSE": false,
+        "Q0": false,
+        "Q100": false,
+        "Q125": false
+      },
+      "differences": []
+    },
+    {
+      "scan": 5,
+      "time_ms": 250,
+      "clock": "T#250ms",
+      "verifier": {
+        "TICK": 6,
+        "AMOUNT": 9,
+        "PHASE": 9,
+        "ENABLE": true,
+        "PULSE": true,
+        "Q0": true,
+        "Q100": false,
+        "Q125": false
+      },
+      "external": {
+        "TICK": 6,
+        "AMOUNT": 9,
+        "PHASE": 9,
+        "ENABLE": true,
+        "PULSE": true,
+        "Q0": false,
+        "Q100": false,
+        "Q125": false
+      },
+      "differences": [
+        "Q0"
+      ]
+    },
+    {
+      "scan": 6,
+      "time_ms": 300,
+      "clock": "T#300ms",
+      "verifier": {
+        "TICK": 7,
+        "AMOUNT": 11,
+        "PHASE": 11,
+        "ENABLE": true,
+        "PULSE": false,
+        "Q0": true,
+        "Q100": false,
+        "Q125": false
+      },
+      "external": {
+        "TICK": 7,
+        "AMOUNT": 11,
+        "PHASE": 11,
+        "ENABLE": true,
+        "PULSE": false,
+        "Q0": true,
+        "Q100": false,
+        "Q125": false
+      },
+      "differences": []
+    },
+    {
+      "scan": 7,
+      "time_ms": 350,
+      "clock": "T#350ms",
+      "verifier": {
+        "TICK": 8,
+        "AMOUNT": 13,
+        "PHASE": 13,
+        "ENABLE": true,
+        "PULSE": false,
+        "Q0": true,
+        "Q100": true,
+        "Q125": false
+      },
+      "external": {
+        "TICK": 8,
+        "AMOUNT": 13,
+        "PHASE": 13,
+        "ENABLE": true,
+        "PULSE": false,
+        "Q0": true,
+        "Q100": true,
+        "Q125": false
+      },
+      "differences": []
+    }
+  ]
+}

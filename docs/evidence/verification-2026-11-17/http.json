@@ -1,0 +1,158 @@
+[
+  {
+    "example": "lubrication / normal",
+    "status": "PASS",
+    "repeat_identical": true,
+    "direct_engine_equal": true,
+    "http_result_bytes": 17151,
+    "export_bytes": {
+      "json": 17151,
+      "csv": 10276,
+      "html": 44587,
+      "xml": 412
+    }
+  },
+  {
+    "example": "lubrication / fault",
+    "status": "PASS",
+    "repeat_identical": true,
+    "direct_engine_equal": true,
+    "http_result_bytes": 16372,
+    "export_bytes": {
+      "json": 16372,
+      "csv": 9114,
+      "html": 41757,
+      "xml": 451
+    }
+  },
+  {
+    "example": "lubrication / DEFECTO timeout_disabled",
+    "status": "FAIL",
+    "repeat_identical": true,
+    "direct_engine_equal": true,
+    "http_result_bytes": 17955,
+    "export_bytes": {
+      "json": 17955,
+      "csv": 8928,
+      "html": 79983,
+      "xml": 4220
+    }
+  },
+  {
+    "example": "lubrication / DEFECTO auto_ack",
+    "status": "FAIL",
+    "repeat_identical": true,
+    "direct_engine_equal": true,
+    "http_result_bytes": 18179,
+    "export_bytes": {
+      "json": 18179,
+      "csv": 9119,
+      "html": 82219,
+      "xml": 4383
+    }
+  },
+  {
+    "example": "alternating / normal",
+    "status": "PASS",
+    "repeat_identical": true,
+    "direct_engine_equal": true,
+    "http_result_bytes": 9409,
+    "export_bytes": {
+      "json": 9409,
+      "csv": 5139,
+      "html": 24264,
+      "xml": 338
+    }
+  },
+  {
+    "example": "alternating / DEFECTO overlap",
+    "status": "FAIL",
+    "repeat_identical": true,
+    "direct_engine_equal": true,
+    "http_result_bytes": 10096,
+    "export_bytes": {
+      "json": 10096,
+      "csv": 5136,
+      "html": 42263,
+      "xml": 2228
+    }
+  },
+  {
+    "example": "alternating / DEFECTO no_alternation",
+    "status": "FAIL",
+    "repeat_identical": true,
+    "direct_engine_equal": true,
+    "http_result_bytes": 9747,
+    "export_bytes": {
+      "json": 9747,
+      "csv": 5132,
+      "html": 33256,
+      "xml": 1291
+    }
+  },
+  {
+    "example": "alternating / fault",
+    "status": "PASS",
+    "repeat_identical": true,
+    "direct_engine_equal": true,
+    "http_result_bytes": 10539,
+    "export_bytes": {
+      "json": 10539,
+      "csv": 4609,
+      "html": 26116,
+      "xml": 458
+    }
+  },
+  {
+    "example": "conveyor / normal",
+    "status": "PASS",
+    "repeat_identical": true,
+    "direct_engine_equal": true,
+    "http_result_bytes": 15438,
+    "export_bytes": {
+      "json": 15438,
+      "csv": 9031,
+      "html": 40671,
+      "xml": 413
+    }
+  },
+  {
+    "example": "conveyor / DEFECTO reverse_start",
+    "status": "FAIL",
+    "repeat_identical": true,
+    "direct_engine_equal": true,
+    "http_result_bytes": 16885,
+    "export_bytes": {
+      "json": 16885,
+      "csv": 8600,
+      "html": 75259,
+      "xml": 4273
+    }
+  },
+  {
+    "example": "conveyor / fault",
+    "status": "PASS",
+    "repeat_identical": true,
+    "direct_engine_equal": true,
+    "http_result_bytes": 15543,
+    "export_bytes": {
+      "json": 15543,
+      "csv": 9148,
+      "html": 41851,
+      "xml": 345
+    }
+  },
+  {
+    "example": "conveyor / DEFECTO auto_restart",
+    "status": "FAIL",
+    "repeat_identical": true,
+    "direct_engine_equal": true,
+    "http_result_bytes": 17137,
+    "export_bytes": {
+      "json": 17137,
+      "csv": 9541,
+      "html": 70704,
+      "xml": 3092
+    }
+  }
+]

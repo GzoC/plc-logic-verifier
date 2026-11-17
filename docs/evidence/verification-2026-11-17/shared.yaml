@@ -1,0 +1,12 @@
+id: runtime-comparison
+program: shared.st
+description: Synthetic comparison with no external inputs
+scan_ms: 50
+duration_ms: 400
+initial: {}
+events: []
+requirements:
+- id: executed
+  description: Trace acquisition only
+  kind: always
+  expr: 'TRUE'

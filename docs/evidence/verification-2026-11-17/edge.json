@@ -1,0 +1,97 @@
+{
+  "downloads": [
+    {
+      "file": "PASS/result.json",
+      "bytes": 15438,
+      "sha256": "7c658bbe7d08726646079749f249edbb3cbd946d74d4bad9f98cbd3063dda5a8",
+      "request": "POST /export",
+      "status": 200,
+      "mime": "application/octet-stream",
+      "event": "download"
+    },
+    {
+      "file": "PASS/trace.csv",
+      "bytes": 9031,
+      "sha256": "c7c23d1c02a1054f60f97fa85c5a1d90224de08daeed21249230e3c52a0d4804",
+      "request": "POST /export",
+      "status": 200,
+      "mime": "application/octet-stream",
+      "event": "download"
+    },
+    {
+      "file": "PASS/report.html",
+      "bytes": 40671,
+      "sha256": "cbef1203bf7d5e68b7d090e94cba17002d810ea45065648e851f8be71c3bf79c",
+      "request": "POST /export",
+      "status": 200,
+      "mime": "application/octet-stream",
+      "event": "download"
+    },
+    {
+      "file": "PASS/junit.xml",
+      "bytes": 413,
+      "sha256": "ce9574b5268a574444045a1214e1371bb1071b587aeafd3fe3bda2fff8b91f02",
+      "request": "POST /export",
+      "status": 200,
+      "mime": "application/octet-stream",
+      "event": "download",
+      "junit": {
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    {
+      "file": "FAIL/result.json",
+      "bytes": 16885,
+      "sha256": "c756b4bcbbaae0e04f5562cbff866c9f15edfbaddd9eb8c58275a7e0401116bc",
+      "request": "POST /export",
+      "status": 200,
+      "mime": "application/octet-stream",
+      "event": "download"
+    },
+    {
+      "file": "FAIL/trace.csv",
+      "bytes": 8600,
+      "sha256": "036f4072d8fed47eb7d734dc28bd67bf4a092d54c23e182cf5fbbd0402b4763d",
+      "request": "POST /export",
+      "status": 200,
+      "mime": "application/octet-stream",
+      "event": "download"
+    },
+    {
+      "file": "FAIL/report.html",
+      "bytes": 75259,
+      "sha256": "8dca55289d031d31c537955227a6eaf6840ecb1d55ba0c803e78f02bbaa203fa",
+      "request": "POST /export",
+      "status": 200,
+      "mime": "application/octet-stream",
+      "event": "download"
+    },
+    {
+      "file": "FAIL/junit.xml",
+      "bytes": 4273,
+      "sha256": "5bc25c68dc7d44ca9f75fb50d2edef2930f13a9798b7a726c1edf48ddba8be61",
+      "request": "POST /export",
+      "status": 200,
+      "mime": "application/octet-stream",
+      "event": "download",
+      "junit": {
+        "tests": 5,
+        "failures": 3,
+        "errors": 0,
+        "skipped": 0
+      }
+    }
+  ],
+  "console": [
+    [
+      "error",
+      "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "favicon.ico"
+    ]
+  ],
+  "page_errors": [],
+  "browser": "Microsoft Edge 157.0.4341.46"
+}

@@ -1,3 +1,11 @@
+# Estado vigente — 2026-11-17
+
+Estado vigente: `main` y `origin/main` en `ecd478c82ae9bdfe2af2898779daf909af2148a4`; CI Windows y Linux aprobada. Se verificaron los ocho archivos en Edge y ocho scans con IronPLC. Integración real con proveedor: pendiente. Véanse [evidencias, diferencias y comandos del 17 de noviembre](VERIFICATION_2026-11-17.md).
+
+---
+
+**Registro histórico:** las indicaciones de trabajo sólo local, CI pendiente o descarga XML pendiente describen la fecha de la sección siguiente.
+
 # Evidencia histórica (2026-11-14/15)
 
 Los resultados siguientes pertenecen a la versión anterior. Para las correcciones y

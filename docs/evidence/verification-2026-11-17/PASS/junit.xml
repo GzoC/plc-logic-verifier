@@ -1,0 +1,2 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="conveyor-normal" tests="5" failures="0" errors="0" skipped="0"><testcase name="C01-order" classname="plc.requirement" /><testcase name="C01-delay" classname="plc.requirement" /><testcase name="C01-run" classname="plc.requirement" /><testcase name="C02-drain" classname="plc.requirement" /><testcase name="C02-stop" classname="plc.requirement" /></testsuite>
